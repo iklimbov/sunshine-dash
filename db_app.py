@@ -2,11 +2,9 @@ import dash
 import pandas as pd
 
 # external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
 # external_stylesheets = ['https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css']
-
-
 # app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
 app = dash.Dash(__name__)
 
 app.css.append_css({
@@ -16,12 +14,14 @@ app.css.append_css({
 server = app.server
 app.config.suppress_callback_exceptions = True
 
-df =  pd.read_csv('data/2008_2018prod.csv')
+# df =  pd.read_csv('data/2008_2018prod.csv')
 # df =  pd.read_csv('data/2008prod.csv')
 # df = pd.read_csv('https://s3.ca-central-1.amazonaws.com/sunshinelist/2008_2018prod.csv.bz2', compression='bz2', header=0, sep=',', quotechar='"')
 
-df = df[df._gender_x!='unknown']
+# df = pd.read_csv('data/2008_2018prod.csv.bz2', compression='bz2', header=0, sep=',', quotechar='"')
 
+df = pd.read_csv('data/2008_2018_first_tab.csv.bz2', compression='bz2', header=0, sep=',', quotechar='"')
+df18 = pd.read_csv('data/2018prod.csv.bz2', compression='bz2', header=0, sep=',', quotechar='"')
 
 YEARS = [i for i in range(2008,2019)]
 

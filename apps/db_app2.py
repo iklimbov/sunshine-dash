@@ -57,16 +57,6 @@ layout = html.Div(children=[
         ],className='col-sm-6'),
         html.Div([
           html.Div([
-                  html.Div([
-                      html.Div([
-                          html.H5(children='Select Year:'),
-                          dcc.Dropdown(
-                                id='year_select',
-                                options=[{'label': i, 'value': i} for i in db_app.YEARS],
-                                value = db_app.CURRENT_YEAR,
-                                clearable=False,
-                      )],),
-                  ]),
 
                   html.Div([
                     html.H5(
@@ -133,14 +123,14 @@ layout = html.Div(children=[
 ###############################################################################
 @app.callback(
     Output(component_id='dist_graph', component_property='figure'),
-    [Input(component_id='year_select', component_property='value'), 
-    Input(component_id='position_select2', component_property='value'),
+    [Input(component_id='position_select2', component_property='value'),
     Input(component_id='inflation_ajust2', component_property='values'),
     Input(component_id='include_benefits2', component_property='values'),
     Input(component_id='include_salary2', component_property='values'),
     Input(component_id='salary_slider2', component_property='value')])
-def cbg1(year, position, inflation, benefits, salary, salaries):
-    df_temp = db_app.df.copy()
+def cbg1(position, inflation, benefits, salary, salaries):
+
+    df_temp = db_app.df18.copy()
 
     if position!='' and position!=None:
         if position=='chief':
@@ -156,15 +146,12 @@ def cbg1(year, position, inflation, benefits, salary, salaries):
         if earn_column=="":
             return ""
 
-        df_temp =  df_temp[df_temp.c_year == int(year)]
-
         if df_temp.shape[0]==0 :
             return ""
 
         df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
         if (salaries[1]<600000):
             df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
-            # df_temp[earn_column] = [i if i < salaries[1] else salaries[1] for i in df_temp[earn_column]]
 
         if df_temp.shape[0]==0:
                 return ""
@@ -175,18 +162,17 @@ def cbg1(year, position, inflation, benefits, salary, salaries):
         df_m= df_temp[df_temp._gender_x.astype(str)=='male']
         df_f= df_temp[df_temp._gender_x.astype(str)=='female']
 
-    return fun.format_dist_graph_data(df_f, df_m, "Salary Distribution for " + str(year))
+    return fun.format_dist_graph_data(df_f, df_m, "Salary Distribution")
 
 @app.callback(
     Output(component_id='dist_graph1', component_property='figure'),
     [Input(component_id='sector_select2', component_property='value'),
-    Input(component_id='year_select', component_property='value'), 
     Input(component_id='position_select2', component_property='value'),
     Input(component_id='inflation_ajust2', component_property='values'),
     Input(component_id='include_benefits2', component_property='values'),
     Input(component_id='include_salary2', component_property='values'),
     Input(component_id='salary_slider2', component_property='value')])
-def cbg2(sector,year, position, inflation, benefits, salary, salaries):
+def cbg2(sector, position, inflation, benefits, salary, salaries):
     if (sector==None):
         return {
                 'layout': {
@@ -197,7 +183,7 @@ def cbg2(sector,year, position, inflation, benefits, salary, salaries):
                     'legend':{'orientation':"h"}
                 }}
 
-    df_temp = db_app.df.copy()
+    df_temp = db_app.df18.copy()
 
     if position!='' and position!=None:
         if position=='chief':
@@ -219,15 +205,12 @@ def cbg2(sector,year, position, inflation, benefits, salary, salaries):
         if earn_column=="":
             return ""
 
-        df_temp =  df_temp[df_temp.c_year == int(year)]
-
         if df_temp.shape[0]==0 :
             return ""
 
         df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
         if (salaries[1]<600000):
             df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
-            # df_temp[earn_column] = [i if i < salaries[1] else salaries[1] for i in df_temp[earn_column]]
 
         if df_temp.shape[0]==0:
                 return ""
@@ -243,14 +226,13 @@ def cbg2(sector,year, position, inflation, benefits, salary, salaries):
 @app.callback(
     Output(component_id='dist_graph2', component_property='figure'),
     [Input(component_id='sector_select2', component_property='value'),
-    Input(component_id='year_select', component_property='value'), 
     Input(component_id='companies_select2', component_property='value'),
     Input(component_id='position_select2', component_property='value'),
     Input(component_id='inflation_ajust2', component_property='values'),
     Input(component_id='include_benefits2', component_property='values'),
     Input(component_id='include_salary2', component_property='values'),
     Input(component_id='salary_slider2', component_property='value')])
-def cbg3(sector,year, value2, position, inflation, benefits, salary, salaries):
+def cbg3(sector, value2, position, inflation, benefits, salary, salaries):
     if (value2==None or sector==None or value2=='None'):
         return {
         'layout': {
@@ -261,7 +243,7 @@ def cbg3(sector,year, value2, position, inflation, benefits, salary, salaries):
             'legend':{'orientation':"h"}
         }}
 
-    df_temp = db_app.df.copy()
+    df_temp = db_app.df18.copy()
 
     if position!='' and position!=None:
         if position=='chief':
@@ -288,15 +270,12 @@ def cbg3(sector,year, value2, position, inflation, benefits, salary, salaries):
         if earn_column=="":
             return ""
 
-        df_temp =  df_temp[df_temp.c_year == int(year)]
-
         if df_temp.shape[0]==0 :
             return ""
 
         df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
         if (salaries[1]<600000):
             df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
-            # df_temp[earn_column] = [i if i < salaries[1] else salaries[1] for i in df_temp[earn_column]]
 
         if df_temp.shape[0]==0:
                 return ""
@@ -315,14 +294,12 @@ def cbg3(sector,year, value2, position, inflation, benefits, salary, salaries):
 ###############################################################################
 @app.callback(
     Output(component_id='dist_summary1', component_property='children'),
-    [Input(component_id='year_select', component_property='value'), 
-    Input(component_id='position_select2', component_property='value'),
+    [Input(component_id='position_select2', component_property='value'),
     Input(component_id='inflation_ajust2', component_property='values'),
     Input(component_id='include_benefits2', component_property='values'),
-    Input(component_id='include_salary2', component_property='values'),
-    Input(component_id='salary_slider2', component_property='value')])
-def sb1_adjust(year, position, inflation, benefits, salary, salaries):
-    df_temp = db_app.df.copy()
+    Input(component_id='include_salary2', component_property='values')])
+def sb1_adjust( position, inflation, benefits, salary):
+    df_temp = db_app.df18.copy()
 
     if position!='' and position!=None:
         if position=='chief':
@@ -337,18 +314,8 @@ def sb1_adjust(year, position, inflation, benefits, salary, salaries):
         earn_column = fun.get_earnings_column(inflation, salary, benefits)
         if earn_column=="":
             return ""
-
-        df_temp =  df_temp[df_temp.c_year == int(year)]
-
         if df_temp.shape[0]==0 :
             return ""
-
-        # df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
-        # if (salaries[1]<600000):
-        #     df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
-
-        # if df_temp.shape[0]==0:
-        #         return ""
 
         df_temp = df_temp[['_gender_x','first_name',earn_column]]
         df_temp.columns=['_gender_x','first_name','salary_x']
@@ -379,7 +346,7 @@ def sb1_adjust(year, position, inflation, benefits, salary, salaries):
         df_temp = df_temp[['range','first_name_x','first_name_y','per_female','salary_x_x','salary_x_y', 'per_female_salary']]
         df_temp.columns = ['Decile','# of Female','# of Male','% of Female','Salary Female','Salary Male','% of Female Salary']
 
-    return fun.generate_table(df_temp, title = str(year) + " Decile Summary.  All Industries", display_columns=True, 
+    return fun.generate_table(df_temp, title = "Decile Summary.  All Industries", display_columns=True, 
         dtypes = ["","num","num","per","num","num","per"])
 
 ###############################################################################
@@ -388,18 +355,15 @@ def sb1_adjust(year, position, inflation, benefits, salary, salaries):
 @app.callback(
     Output(component_id='dist_summary2', component_property='children'),
     [Input(component_id='sector_select2', component_property='value'),
-    Input(component_id='year_select', component_property='value'), 
     Input(component_id='position_select2', component_property='value'),
     Input(component_id='inflation_ajust2', component_property='values'),
     Input(component_id='include_benefits2', component_property='values'),
-    Input(component_id='include_salary2', component_property='values'),
-    Input(component_id='salary_slider2', component_property='value')])
-def sb2_adjust(sector,year, position, inflation, benefits, salary, salaries):
+    Input(component_id='include_salary2', component_property='values')])
+def sb2_adjust(sector, position, inflation, benefits, salary):
 
     if (sector==None):
         return ""
-
-    df_temp = db_app.df.copy()
+    df_temp = db_app.df18.copy()
 
     if position!='' and position!=None:
         if position=='chief':
@@ -416,22 +380,11 @@ def sb2_adjust(sector,year, position, inflation, benefits, salary, salaries):
     else:
         
         earn_column = fun.get_earnings_column(inflation, salary, benefits)
-
         if earn_column=="":
             return ""
 
-        df_temp =  df_temp[df_temp.c_year == int(year)]
-
         if df_temp.shape[0]==0 :
             return ""
-
-        # df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
-        # if (salaries[1]<600000):
-        #     df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
-        #     # df_temp[earn_column] = [i if i < salaries[1] else salaries[1] for i in df_temp[earn_column]]
-
-        # if df_temp.shape[0]==0:
-        #         return ""
 
         df_temp = df_temp[['_gender_x','first_name',earn_column]]
         df_temp.columns=['_gender_x','first_name','salary_x']
@@ -461,7 +414,7 @@ def sb2_adjust(sector,year, position, inflation, benefits, salary, salaries):
         # raise ValueError(df_temp.shape, 23)
 
 
-    return fun.generate_table(df_temp, title = str(year) + " Decile Summary. " + str(sector), display_columns=True,
+    return fun.generate_table(df_temp, title = "Decile Summary. " + str(sector), display_columns=True,
         dtypes = ["","num","num","per","num","num","per"])
 
 ###############################################################################
@@ -470,18 +423,15 @@ def sb2_adjust(sector,year, position, inflation, benefits, salary, salaries):
 @app.callback(
     Output(component_id='dist_summary3', component_property='children'),
     [Input(component_id='sector_select2', component_property='value'),
-    Input(component_id='year_select', component_property='value'), 
     Input(component_id='companies_select2', component_property='value'),
     Input(component_id='position_select2', component_property='value'),
     Input(component_id='inflation_ajust2', component_property='values'),
     Input(component_id='include_benefits2', component_property='values'),
-    Input(component_id='include_salary2', component_property='values'),
-    Input(component_id='salary_slider2', component_property='value')])
-def sb3_adjust(sector,year, value2, position, inflation, benefits, salary, salaries):
+    Input(component_id='include_salary2', component_property='values')])
+def sb3_adjust(sector, value2, position, inflation, benefits, salary):
     if (value2==None or sector==None or value2=='None'):
         return ""
-
-    df_temp = db_app.df.copy()
+    df_temp = db_app.df18.copy()
 
     if position!='' and position!=None:
         if position=='chief':
@@ -508,18 +458,8 @@ def sb3_adjust(sector,year, value2, position, inflation, benefits, salary, salar
         if earn_column=="":
             return ""
 
-        df_temp =  df_temp[df_temp.c_year == int(year)]
-
         if df_temp.shape[0]==0 :
             return ""
-
-        # df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
-        # if (salaries[1]<600000):
-        #     df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
-        #     # df_temp[earn_column] = [i if i < salaries[1] else salaries[1] for i in df_temp[earn_column]]
-
-        # if df_temp.shape[0]==0:
-        #         return ""
 
         df_temp = df_temp[['_gender_x','first_name',earn_column]]
         df_temp.columns=['_gender_x','first_name','salary_x']
@@ -548,7 +488,7 @@ def sb3_adjust(sector,year, value2, position, inflation, benefits, salary, salar
         df_temp = df_temp[['range','first_name_x','first_name_y','per_female','salary_x_x','salary_x_y', 'per_female_salary']]
         df_temp.columns = ['Salary Range','# of Female','# of Male','% of Female','Salary Female','Salary Male','% of Female Salary']
 
-    return fun.generate_table(df_temp, title = str(year) + " Decile Summary for "  + str(value2) , display_columns=True, 
+    return fun.generate_table(df_temp, title = "Decile Summary for "  + str(value2) , display_columns=True, 
         dtypes = ["","num","num","per","dol","dol","per"])
 
 

@@ -33,7 +33,7 @@ layout = html.Div(children=[
                     min=0,
                     max=db_app.EARNINGS[-1],
                     step=10000,
-                    value=[db_app.EARNINGS[0], db_app.EARNINGS[-2]],
+                    value=[db_app.EARNINGS[0], db_app.EARNINGS[-1]],
                 ),
                 html.Div([
                     html.H5(children='Select Year Range:'),

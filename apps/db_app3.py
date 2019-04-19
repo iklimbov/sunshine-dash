@@ -138,9 +138,7 @@ layout = html.Div(children=[
     Input(component_id='salary_slider3', component_property='value')])
 def displaySummaryByIndustry(position, inflation,benefits,salary,salaries):
 
-    df_temp = db_app.df.copy()
-    df_temp = df_temp[df_temp.c_year == db_app.CURRENT_YEAR]
-
+    df_temp = db_app.df18.copy()
     
     if position!='' and position!=None:
         if position=='chief':
@@ -212,9 +210,7 @@ def displaySummaryByIndustry(position, inflation,benefits,salary,salaries):
     Input(component_id='salary_slider3', component_property='value')])
 def displaySummaryByCategory(sector,company, inflation,benefits,salary,salaries):
     
-    df_temp = db_app.df.copy()
-
-    df_temp = df_temp[df_temp.c_year == db_app.CURRENT_YEAR]
+    df_temp = db_app.df18.copy()
     df_temp = df_temp[df_temp.job_category1 != 'none']
     
     if (sector != None):
@@ -299,49 +295,45 @@ def displaySummaryByCategory(sector,company, inflation,benefits,salary,salaries)
     Input(component_id='salary_slider3', component_property='value')])
 def cbg4_3( inflation, benefits, salary, salaries):
 
-    df_temp = db_app.df.copy()
-    df_temp =  df_temp[df_temp.c_year == db_app.CURRENT_YEAR]
+    df_temp = db_app.df18.copy()
+
+    earn_column = fun.get_earnings_column(inflation, salary, benefits)
+    if earn_column=="":
+        return ""
+
+    if df_temp.shape[0]==0 :
+        return ""
+
+    df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
+    if (salaries[1]<600000):
+        df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
 
     if df_temp.shape[0]==0:
-        return ""
-    else:
-        earn_column = fun.get_earnings_column(inflation, salary, benefits)
-        if earn_column=="":
             return ""
 
-        if df_temp.shape[0]==0 :
-            return ""
-
-        df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
-        if (salaries[1]<600000):
-            df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
-
-        if df_temp.shape[0]==0:
-                return ""
-
-        df_m= df_temp[df_temp._gender_x.astype(str)=='male']
-        df_f= df_temp[df_temp._gender_x.astype(str)=='female']
-        ret =  {
-                'data': [
-                    {'values': [ int(df_m.shape[0]), int(df_f.shape[0])], 'type': 'pie', 'hoverinfo':'skip',
-                    'labels': ['Male','Female'],'textfont':{'size':'120%'},
-                    'text':['Male: '+ "{:,}".format(df_m.shape[0]),'Female: ' + "{:,}".format(df_f.shape[0])],
-                    'marker':{'colors':[db_app.COLORS['cmale'],db_app.COLORS['cfemale']]}},
-                ],
-                'layout': {
-                    'plot_bgcolor': '#f5f5f5',
-                    'paper_bgcolor': '#f5f5f5',
-                    'title': "Counts",
-                    'font': {
-                        # 'color': db_app.COLORS['text'],
-                        'size':'120%'},
-                    'margin':{'t':25,'r':0,'l':0,'b':0},
-                    'height': 240,
-                    'legend':{'orientation':"h"},
-                    'showlegend':False,
-                }
+    df_m= df_temp[df_temp._gender_x.astype(str)=='male']
+    df_f= df_temp[df_temp._gender_x.astype(str)=='female']
+    ret =  {
+            'data': [
+                {'values': [ int(df_m.shape[0]), int(df_f.shape[0])], 'type': 'pie', 'hoverinfo':'skip',
+                'labels': ['Male','Female'],'textfont':{'size':'120%'},
+                'text':['Male: '+ "{:,}".format(df_m.shape[0]),'Female: ' + "{:,}".format(df_f.shape[0])],
+                'marker':{'colors':[db_app.COLORS['cmale'],db_app.COLORS['cfemale']]}},
+            ],
+            'layout': {
+                'plot_bgcolor': '#f5f5f5',
+                'paper_bgcolor': '#f5f5f5',
+                'title': "Counts",
+                'font': {
+                    # 'color': db_app.COLORS['text'],
+                    'size':'120%'},
+                'margin':{'t':25,'r':0,'l':0,'b':0},
+                'height': 240,
+                'legend':{'orientation':"h"},
+                'showlegend':False,
             }
-        return ret
+        }
+    return ret
 
 @app.callback(
     Output(component_id='summary_pie1', component_property='figure'),
@@ -351,52 +343,47 @@ def cbg4_3( inflation, benefits, salary, salaries):
     Input(component_id='salary_slider3', component_property='value')])
 def cbg4_4( inflation, benefits, salary, salaries):
 
-    df_temp = db_app.df.copy()
-    df_temp =  df_temp[df_temp.c_year == db_app.CURRENT_YEAR]
+    df_temp = db_app.df18.copy()
+
+    earn_column = fun.get_earnings_column(inflation, salary, benefits)
+    if earn_column=="":
+        return ""
+
+    if df_temp.shape[0]==0 :
+        return ""
+
+    df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
+    if (salaries[1]<600000):
+        df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
 
     if df_temp.shape[0]==0:
         return ""
-    else:
-        earn_column = fun.get_earnings_column(inflation, salary, benefits)
-        if earn_column=="":
-            return ""
 
-        if df_temp.shape[0]==0 :
-            return ""
+    df_m= df_temp[df_temp._gender_x.astype(str)=='male']
+    df_f= df_temp[df_temp._gender_x.astype(str)=='female']
 
-        df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
-        if (salaries[1]<600000):
-            df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
-
-        if df_temp.shape[0]==0:
-                return ""
-
-        df_m= df_temp[df_temp._gender_x.astype(str)=='male']
-        df_f= df_temp[df_temp._gender_x.astype(str)=='female']
-
-        m_mean = int(df_m[earn_column].mean())
-        f_mean = int(df_f[earn_column].mean())
-
-        ret =  {
-                'data': [
-                    {'values': [ m_mean, f_mean], 'type': 'pie', 'hoverinfo':'skip', 
-                    'labels': ['',''],'textfont':{'size':'120%'},
-                    'text':[["$"+ "{:,}".format(m_mean)], "$"+ "{:,}".format(f_mean)],
-                    'marker':{'colors':[db_app.COLORS['cmale'],db_app.COLORS['cfemale']]}},
-                ],
-                'layout': {
-                    'plot_bgcolor': '#f5f5f5',
-                    'paper_bgcolor': '#f5f5f5',
-                    'title': "Avg Earnings",
-                    'font': {
-                        'size':'120%'},
-                    'margin':{'t':25,'r':0,'l':0,'b':0},
-                    'height': 240,
-                    'legend':{'orientation':"h"},
-                    'showlegend':False,
-                }
+    m_mean = int(df_m[earn_column].mean())
+    f_mean = int(df_f[earn_column].mean())
+    return {
+            'data': [
+                {'values': [ m_mean, f_mean], 'type': 'pie', 'hoverinfo':'skip', 
+                'labels': ['',''],'textfont':{'size':'120%'},
+                'text':[["$"+ "{:,}".format(m_mean)], "$"+ "{:,}".format(f_mean)],
+                'marker':{'colors':[db_app.COLORS['cmale'],db_app.COLORS['cfemale']]}},
+            ],
+            'layout': {
+                'plot_bgcolor': '#f5f5f5',
+                'paper_bgcolor': '#f5f5f5',
+                'title': "Avg Earnings",
+                'font': {
+                    'size':'120%'},
+                'margin':{'t':25,'r':0,'l':0,'b':0},
+                'height': 240,
+                'legend':{'orientation':"h"},
+                'showlegend':False,
             }
-        return ret
+        }
+
 
 @app.callback(
     Output(component_id='gr_by_sector_counts', component_property='figure'),
@@ -407,8 +394,7 @@ def cbg4_4( inflation, benefits, salary, salaries):
     Input(component_id='salary_slider3', component_property='value')])
 def cbg1_3( position, inflation, benefits, salary, salaries):
 
-    df_temp = db_app.df.copy()
-    df_temp =  df_temp[df_temp.c_year == db_app.CURRENT_YEAR]
+    df_temp = db_app.df18.copy()
 
     if position!='' and position!=None:
         if position=='chief':
@@ -452,8 +438,7 @@ def cbg1_3( position, inflation, benefits, salary, salaries):
     Input(component_id='salary_slider3', component_property='value')])
 def cbg2_3(position, inflation, benefits, salary, salaries):
 
-    df_temp = db_app.df.copy()
-    df_temp =  df_temp[df_temp.c_year == db_app.CURRENT_YEAR]
+    df_temp = db_app.df18.copy()
 
     if position!='' and position!=None:
         if position=='chief':
@@ -496,8 +481,7 @@ def cbg2_3(position, inflation, benefits, salary, salaries):
     Input(component_id='salary_slider3', component_property='value')])
 def cbg1_3( sector, company, inflation, benefits, salary, salaries):
 
-    df_temp = db_app.df.copy()
-    df_temp = df_temp[df_temp.c_year == db_app.CURRENT_YEAR]
+    df_temp = db_app.df18.copy()
     df_temp = df_temp[df_temp.job_category1 != 'none']
 
 
@@ -549,8 +533,7 @@ def cbg1_3( sector, company, inflation, benefits, salary, salaries):
     Input(component_id='salary_slider3', component_property='value')])
 def cbg1_3( sector, company, inflation, benefits, salary, salaries):
 
-    df_temp = db_app.df.copy()
-    df_temp = df_temp[df_temp.c_year == db_app.CURRENT_YEAR]
+    df_temp = db_app.df18.copy()
     df_temp = df_temp[df_temp.job_category1 != 'none']
 
     if (sector != None):

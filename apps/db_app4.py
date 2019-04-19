@@ -18,8 +18,7 @@ import db_app
 import functions as fun
 
 
-df = db_app.df.copy()
-df = df[df.c_year == db_app.CURRENT_YEAR]
+df = db_app.df18.copy()
 
 
 ###############################################################################
@@ -514,7 +513,7 @@ def company_ratings_summary_generate(n, company):
         if df_temp.num_employees.max() == df_temp.num_employees.max():
             temp.append(["# of Employees", df_temp.num_employees.max()])
         if df_temp.ceo.max() > 0:
-            temp.append(["CEO Approval", "{:,}".format(df_temp.ceo.max())])
+            temp.append(["CEO Approval", "{:,}".format(int(df_temp.ceo.max()))+"%"])
         if df_temp.work_life.max() > 0:
             temp.append(["Work/Life Balance", "{:,}".format(df_temp.work_life.max())])
         if df_temp.salary.max() > 0:
@@ -534,7 +533,7 @@ def company_ratings_summary_generate(n, company):
         if(temp_df.shape[0]==0):
             return "No Reviews for " + company
 
-        return fun.generate_table(temp_df, title = "Ranking Summary", display_columns=False)
+        return fun.generate_table(temp_df, title = "Ranking Summary", display_columns=False, highlight_row =1)
 
 
 @app.callback(
