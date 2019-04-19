@@ -1,18 +1,22 @@
 import dash
 import pandas as pd
 
-# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-# external_stylesheets = ['https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css']
-# app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
 app = dash.Dash(__name__)
+
+server = app.server
+app.config.suppress_callback_exceptions = True
 
 app.css.append_css({
     'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
 })
 
-server = app.server
-app.config.suppress_callback_exceptions = True
+
+
+# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+# external_stylesheets = ['https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css']
+# app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
+
 
 # df =  pd.read_csv('data/2008_2018prod.csv')
 # df =  pd.read_csv('data/2008prod.csv')

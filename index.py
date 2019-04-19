@@ -6,9 +6,12 @@ from flask import send_from_directory
 import os
 import flask
 
+import db_app
 from db_app import app
 from apps import db_app1, db_app2, tabs
 
+
+app = db_app.app
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
