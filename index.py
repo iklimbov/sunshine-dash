@@ -12,6 +12,7 @@ from apps import db_app1, db_app2, tabs
 
 
 app = db_app.app
+server = app.server
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
