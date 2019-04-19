@@ -410,7 +410,7 @@ def sb2_adjust(sector, position, inflation, benefits, salary):
         df_temp['per_female'] = fun.get_f_count_number(df_temp.first_name_x, df_temp.first_name_y)
         df_temp['per_female_salary'] = fun.get_f_count_number(df_temp.salary_x_x, df_temp.salary_x_y)
         df_temp = df_temp[['range','first_name_x','first_name_y','per_female','salary_x_x','salary_x_y', 'per_female_salary']]
-        df_temp.columns = ['Salary Range','# of Female','# of Male','% of Female','Salary Female','Salary Male','% of Female Salary']
+        df_temp.columns = ['Decile','# of Female','# of Male','% of Female','Salary Female','Salary Male','% of Female Salary']
         # raise ValueError(df_temp.shape, 23)
 
 
@@ -486,7 +486,7 @@ def sb3_adjust(sector, value2, position, inflation, benefits, salary):
         df_temp['per_female'] = fun.get_f_count_number(df_temp.first_name_x, df_temp.first_name_y)
         df_temp['per_female_salary'] = fun.get_f_count_number(df_temp.salary_x_x, df_temp.salary_x_y)
         df_temp = df_temp[['range','first_name_x','first_name_y','per_female','salary_x_x','salary_x_y', 'per_female_salary']]
-        df_temp.columns = ['Salary Range','# of Female','# of Male','% of Female','Salary Female','Salary Male','% of Female Salary']
+        df_temp.columns = ['Decile','# of Female','# of Male','% of Female','Salary Female','Salary Male','% of Female Salary']
 
     return fun.generate_table(df_temp, title = "Decile Summary for "  + str(value2) , display_columns=True, 
         dtypes = ["","num","num","per","dol","dol","per"])

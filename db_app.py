@@ -24,10 +24,8 @@ app.css.append_css({
 
 # df = pd.read_csv('data/2008_2018prod.csv.bz2', compression='bz2', header=0, sep=',', quotechar='"')
 
-# df = pd.read_csv('data/2008_2018_first_tab.csv.bz2', compression='bz2', header=0, sep=',', quotechar='"')
+df = pd.read_csv('data/2008_2018_first_tab.csv.bz2', compression='bz2', header=0, sep=',', quotechar='"')
 df18 = pd.read_csv('data/2018prod.csv.bz2', compression='bz2', header=0, sep=',', quotechar='"')
-
-df = df18.copy()
 
 YEARS = [i for i in range(2008,2019)]
 

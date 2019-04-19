@@ -279,21 +279,13 @@ def clean_data(sector,value1, value2, position, inflation, benefits, salary, sal
 
 @app.callback(
     Output(component_id='sector_avg_box', component_property='children'),
-    [Input(component_id='sector_select', component_property='value'),
-    Input(component_id='year_slider', component_property='value'), 
-    Input(component_id='inflation_ajust', component_property='values'),
+    [Input(component_id='inflation_ajust', component_property='values'),
     Input(component_id='include_benefits', component_property='values'),
     Input(component_id='include_salary', component_property='values'),
     Input(component_id='salary_slider', component_property='value')])
-def displaySectorSummary(sector,value1, inflation, benefits, salary, salaries):
+def displaySectorSummary(inflation, benefits, salary, salaries):
 
-    df_temp = db_app.df.copy()
-
-    if (sector != None):
-        df_temp = df_temp[df_temp._sector == sector]
-        # raise ValueError(df_temp.shape, 23)
-    else:
-        sector = "All Industries"
+    df_temp = db_app.df[db_app.df.c_year==db_app.CURRENT_YEAR]
 
     if df_temp.shape[0]==0:
         return ""
@@ -302,9 +294,6 @@ def displaySectorSummary(sector,value1, inflation, benefits, salary, salaries):
         earn_column = fun.get_earnings_column(inflation, salary, benefits)
         if earn_column=="":
             return ""
-
-        df_temp =  df_temp[df_temp.c_year >= int(value1[0])]
-        df_temp =  df_temp[df_temp.c_year <= int(value1[1])]
 
         if df_temp.shape[0]==0 :
             return ""
@@ -335,7 +324,7 @@ def displaySectorSummary(sector,value1, inflation, benefits, salary, salaries):
         dd.fillna(0, inplace=True)
         dd.columns = ['Industry','# of Male','# of Female', '% of Female','Male Earnings','Female Earnings','% of Female Earnings']
 
-    return fun.generate_table(dd, title='Averages by Industry',  dtypes = ["","num","num","per","dol","dol","per"])
+    return fun.generate_table(dd, title='Averages by Industry for '+ str(db_app.CURRENT_YEAR),  dtypes = ["","num","num","per","dol","dol","per"])
 
 @app.callback(
     Output(component_id='results_box', component_property='children'),
