@@ -3,14 +3,11 @@ import pandas as pd
 
 app = dash.Dash(__name__)
 
-
 app.config.suppress_callback_exceptions = True
 
 app.css.append_css({
     'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
 })
-
-
 
 # external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 # external_stylesheets = ['https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css']

@@ -2,6 +2,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from flask import send_from_directory
+import logging
+import gunicorn
 
 import os
 import flask
@@ -14,10 +16,12 @@ from apps import db_app1, db_app2, tabs
 app = db_app.app
 server = app.server
 
+
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.Div(id='page-content')
 ])
+
 
 
 @app.callback(Output('page-content', 'children'),
@@ -45,3 +49,6 @@ for stylesheet in stylesheets:
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)

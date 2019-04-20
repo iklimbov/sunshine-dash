@@ -130,6 +130,9 @@ layout = html.Div(children=[
     Output(component_id='companies_select', component_property= 'options'),
     [Input(component_id='sector_select', component_property='value')])
 def call1(value):
+
+    # db_app.app.logger.info("this is an INFO message")
+
     temp = db_app.df[db_app.df._sector==value]
     options=[]
     ret1 = temp.employer.unique()
