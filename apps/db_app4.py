@@ -165,7 +165,7 @@ def cbg1_3(n, company, inflation, benefits, salary, salaries):
 
     if (company == "" or company==None):
         return ""
-    df_temp=df[df.employer.encode('utf-8')==company.encode('utf-8')]
+    df_temp=df[df.employer.str.encode('utf-8')==company.encode('utf-8')]
 
     if df_temp.shape[0]==0:
         return {}
@@ -239,7 +239,7 @@ def cbg1_3(n, company, inflation, benefits, salary, salaries):
 def company_pie1_generate(n, company, inflation, benefits, salary, salaries):
     if (company == "" or company==None):
         return ""
-    df_temp=df[df.employer.encode('utf-8')==company.encode('utf-8')]
+    df_temp=df[df.employer.str.encode('utf-8')==company.encode('utf-8')]
 
     if df_temp.shape[0]==0:
         return {}
@@ -292,7 +292,7 @@ def company_pie1_generate(n, company, inflation, benefits, salary, salaries):
 def company_pie2_generate(n, company, inflation, benefits, salary, salaries):
     if (company == "" or company==None):
         return ""
-    df_temp=df[df.employer.encode('utf-8')==company.encode('utf-8')]
+    df_temp=df[df.employer.str.encode('utf-8')==company.encode('utf-8')]
 
     if df_temp.shape[0]==0:
         return {}
@@ -354,7 +354,7 @@ def company_pie2_generate(n, company, inflation, benefits, salary, salaries):
 def company_summary1_generate(n, company, inflation, benefits, salary, salaries):
     if (company == "" or company==None):
         return ""
-    df_temp=df[df.employer.encode('utf-8')==company.encode('utf-8')]
+    df_temp=df[df.employer.str.encode('utf-8')==company.encode('utf-8')]
 
     if df_temp.shape[0]==0:
         return ""
@@ -458,7 +458,7 @@ def ratings_all_summary(n, company, sector):
 
         df_temp.columns = ['Rank','Company','Avg Score', '# of Reviews', 'Culture','Work/Life Balance']
 
-        ranks = df_temp[df_temp.Company.encode('utf-8')==company.encode('utf-8')].Rank.tolist()
+        ranks = df_temp[df_temp.Company.str.encode('utf-8')==company.encode('utf-8')].Rank.tolist()
         my_rank = 0
         if df_temp.shape[0]>0:
             my_rank = ranks[0] -1
@@ -487,7 +487,7 @@ def ratings_all_summary(n, company, sector):
 def company_ratings_summary_generate(n, company):
     if (company == "" or company==None):
         return ""
-    df_temp=df[df.employer.encode('utf-8')==company.encode('utf-8')]
+    df_temp=df[df.employer.str.encode('utf-8')==company.encode('utf-8')]
 
     if df_temp.shape[0]==0:
         return ""

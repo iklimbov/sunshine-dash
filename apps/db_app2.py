@@ -258,7 +258,7 @@ def cbg3(sector, company, position, inflation, benefits, salary, salaries):
         sector = "All Industries"
 
     if ( str(company) != 'None'):
-        df_temp = df_temp[df_temp.employer.encode('utf-8')==company.encode('utf-8')]
+        df_temp = df_temp[df_temp.employer.str.encode('utf-8')==company.encode('utf-8')]
     else:
         company = "All Companies"
 
@@ -446,7 +446,7 @@ def sb3_adjust(sector, company, position, inflation, benefits, salary):
         sector = "All Industries"
 
     if ( str(company) != 'None'):
-        df_temp = df_temp[df_temp.employer.encode('utf-8')==company.encode('utf-8')]
+        df_temp = df_temp[df_temp.employer.str.encode('utf-8')==company.encode('utf-8')]
     else:
         company = "All Companies"
 

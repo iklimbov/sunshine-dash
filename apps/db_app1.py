@@ -178,7 +178,7 @@ def clean_data(sector,value1, company, position, inflation, benefits, salary, sa
         sector = "All Industries"
 
     if ( str(company) != 'None'):
-        df_temp = df_temp[df_temp.employer.encode('utf-8')==company.encode('utf-8')]
+        df_temp = df_temp[df_temp.employer.str.encode('utf-8')==company.encode('utf-8')]
     else:
         company = "All Companies"
 
