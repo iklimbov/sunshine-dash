@@ -131,8 +131,6 @@ layout = html.Div(children=[
     [Input(component_id='sector_select', component_property='value')])
 def call1(value):
 
-    # db_app.app.logger.info("this is an INFO message")
-
     temp = db_app.df[db_app.df._sector==value]
     options=[]
     ret1 = temp.employer.unique()
@@ -162,7 +160,7 @@ def call2(value):
     Input(component_id='include_benefits', component_property='values'),
     Input(component_id='include_salary', component_property='values'),
     Input(component_id='salary_slider', component_property='value')])
-def clean_data(sector,value1, value2, position, inflation, benefits, salary, salaries):
+def clean_data(sector,value1, company, position, inflation, benefits, salary, salaries):
 
     df_temp = db_app.df.copy()
 
@@ -179,10 +177,10 @@ def clean_data(sector,value1, value2, position, inflation, benefits, salary, sal
     else:
         sector = "All Industries"
 
-    if ( str(value2) != 'None'):
-        df_temp = df_temp[df_temp.employer==value2]
+    if ( str(company) != 'None'):
+        df_temp = df_temp[df_temp.employer.encode('utf-8')==company.encode('utf-8')]
     else:
-        value2 = "All Companies"
+        company = "All Companies"
 
     if df_temp.shape[0]==0:
         return ""
@@ -230,11 +228,11 @@ def clean_data(sector,value1, value2, position, inflation, benefits, salary, sal
 #     Input(component_id='include_benefits', component_property='values'),
 #     Input(component_id='include_salary', component_property='values'),
 #     Input(component_id='salary_slider', component_property='value')])
-# def displayParameterSummary(sector,value1, value2, position, inflation, benefits, salary, salaries):
+# def displayParameterSummary(sector,value1, company, position, inflation, benefits, salary, salaries):
 #     if sector==None:
 #         sector = "All Industries"
-#     if value2==None or value2=='None':
-#         value2 = "All Companies"
+#     if company==None or company=='None':
+#         company = "All Companies"
 #     if len(inflation)==0:
 #         inflation=['Not Adjusted']
 #     else:
@@ -271,7 +269,7 @@ def clean_data(sector,value1, value2, position, inflation, benefits, salary, sal
 #         temp.append(["Salary Range", "{:,}".format(salaries[0]) + " - " + "{:,}".format(salaries[1])])
 
 #     temp.append(["Industry", str(sector)])
-#     temp.append(["Company", str(value2)])
+#     temp.append(["Company", str(company)])
 #     temp.append(["Positions", position])
 #     temp.append(["Adjusted to Inflation", str(inflation[0])])
 #     temp.append(["Base Salary Included", str(salary)])

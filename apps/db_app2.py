@@ -232,8 +232,8 @@ def cbg2(sector, position, inflation, benefits, salary, salaries):
     Input(component_id='include_benefits2', component_property='values'),
     Input(component_id='include_salary2', component_property='values'),
     Input(component_id='salary_slider2', component_property='value')])
-def cbg3(sector, value2, position, inflation, benefits, salary, salaries):
-    if (value2==None or sector==None or value2=='None'):
+def cbg3(sector, company, position, inflation, benefits, salary, salaries):
+    if (company==None or sector==None or company=='None'):
         return {
         'layout': {
             'visible':'legendonly',
@@ -257,10 +257,10 @@ def cbg3(sector, value2, position, inflation, benefits, salary, salaries):
     else:
         sector = "All Industries"
 
-    if ( str(value2) != 'None'):
-        df_temp = df_temp[df_temp.employer==value2]
+    if ( str(company) != 'None'):
+        df_temp = df_temp[df_temp.employer.encode('utf-8')==company.encode('utf-8')]
     else:
-        value2 = "All Companies"
+        company = "All Companies"
 
     if df_temp.shape[0]==0:
         return ""
@@ -286,7 +286,7 @@ def cbg3(sector, value2, position, inflation, benefits, salary, salaries):
         df_m= df_temp[df_temp._gender_x.astype(str)=='male']
         df_f= df_temp[df_temp._gender_x.astype(str)=='female']
 
-    return  fun.format_dist_graph_data(df_f, df_m, "Salary Distribution. " + value2)
+    return  fun.format_dist_graph_data(df_f, df_m, "Salary Distribution. " + company)
 
 
 ###############################################################################
@@ -428,8 +428,8 @@ def sb2_adjust(sector, position, inflation, benefits, salary):
     Input(component_id='inflation_ajust2', component_property='values'),
     Input(component_id='include_benefits2', component_property='values'),
     Input(component_id='include_salary2', component_property='values')])
-def sb3_adjust(sector, value2, position, inflation, benefits, salary):
-    if (value2==None or sector==None or value2=='None'):
+def sb3_adjust(sector, company, position, inflation, benefits, salary):
+    if (company==None or sector==None or company=='None'):
         return ""
     df_temp = db_app.df18.copy()
 
@@ -445,10 +445,10 @@ def sb3_adjust(sector, value2, position, inflation, benefits, salary):
     else:
         sector = "All Industries"
 
-    if ( str(value2) != 'None'):
-        df_temp = df_temp[df_temp.employer==value2]
+    if ( str(company) != 'None'):
+        df_temp = df_temp[df_temp.employer.encode('utf-8')==company.encode('utf-8')]
     else:
-        value2 = "All Companies"
+        company = "All Companies"
 
     if df_temp.shape[0]==0:
         return ""
@@ -488,7 +488,7 @@ def sb3_adjust(sector, value2, position, inflation, benefits, salary):
         df_temp = df_temp[['range','first_name_x','first_name_y','per_female','salary_x_x','salary_x_y', 'per_female_salary']]
         df_temp.columns = ['Decile','# of Female','# of Male','% of Female','Salary Female','Salary Male','% of Female Salary']
 
-    return fun.generate_table(df_temp, title = "Decile Summary for "  + str(value2) , display_columns=True, 
+    return fun.generate_table(df_temp, title = "Decile Summary for "  + str(company) , display_columns=True, 
         dtypes = ["","num","num","per","dol","dol","per"])
 
 
