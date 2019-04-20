@@ -26,6 +26,10 @@ import db_app
 ##############################################################################
 def format_dist_graph_data(df_f,df_m, title ):
 
+    df_m.salary_x = df_m.salary_x.astype(int)
+    df_f.salary_x = df_f.salary_x.astype(int)
+
+
     gr_layout = {
             'plot_bgcolor': db_app.COLORS['background'],
             'paper_bgcolor': db_app.COLORS['background'],
@@ -96,6 +100,8 @@ def get_f_count_number(f, m):
 
     ret = []
     for a, b in zip (f,m):
+        a = float(a)
+        b = float(b)
         try:
             ret.append(int(a/(a+b)*100))
         except:
@@ -106,6 +112,8 @@ def get_m_count_number(f, m):
 
     ret = []
     for a, b in zip (f,m):
+        a = float(a)
+        b = float(b)
         try:
             ret.append(int(b/(a+b)*100))
         except:
@@ -117,6 +125,8 @@ def get_f_count(f, m):
 
     ret = []
     for a, b in zip (f,m):
+        a = float(a)
+        b = float(b)
         try:
             ret.append( str(int(a/(a+b)*100)) + "%")
         except:
@@ -126,6 +136,8 @@ def get_m_count(f, m):
 
     ret = []
     for a, b in zip (f,m):
+        a = float(a)
+        b = float(b)
         try:
             ret.append(str(int(b/(a+b)*100)) + "%")
         except:
@@ -163,17 +175,16 @@ def generate_table(dataframe, max_rows=20, title = "", display_columns = True, d
         cols = [html.Tr([html.Th(col) for col in dataframe.columns])]
 
     highlight = 'highlight_row'
-    classes = ["none" if i != highlight_row else highlight for i in range(0, len(dataframe))]
+    classes = ["none" if int(i) != int(highlight_row) else highlight for i in range(0, len(dataframe))]
 
     body = (
         cols +
-
         # Body
         [html.Tr([
             html.Td(format_me(use_dtypes,dataframe.iloc[i][col],ii)) for col, ii in zip(dataframe.columns,dtypes)
         ],
-            className = ii
-        ) for i, ii in zip (range(min(len(dataframe), max_rows)),classes )])
+            className = iii
+        ) for i, iii in zip (range(min(len(dataframe), max_rows)),classes )])
 
     table =  html.Table(
         body

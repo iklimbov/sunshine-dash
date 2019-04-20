@@ -16,6 +16,11 @@ from apps import db_app1, db_app2, tabs
 app = db_app.app
 server = app.server
 
+gunicorn_error_logger = logging.getLogger('gunicorn.error')
+app.logger.handlers.extend(gunicorn_error_logger.handlers)
+# app.logger.setLevel(logging.DEBUG)
+# app.logger.debug('this will show in the log')
+
 
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),

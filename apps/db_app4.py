@@ -192,18 +192,9 @@ def cbg1_3(n, company, inflation, benefits, salary, salaries):
 
         dd = pd.merge(df_f, df_m, how='outer', left_on='job_category1', right_on='job_category1')
         dd.fillna(0, inplace=True)
-        def get_female_percent(f,m):
-            f = int(f)
-            m = int(m)
-            if (f == 0 ):
-                return 0
-            if (m == 0 & f!=0):
-                return 100
 
-            return round(f/(f+m)*100,2)
-
-        dd['female_per'] =  dd.apply(lambda x: get_female_percent(x.first_name_x, x.first_name_y), axis=1)
-        dd['male_per'] =  dd.apply(lambda x: get_female_percent(x.first_name_y, x.first_name_x), axis=1)
+        dd['female_per'] = fun.get_f_count_number(dd.first_name_x, dd.first_name_y)
+        dd['male_per'] = fun.get_m_count_number(dd.first_name_x, dd.first_name_y)
         # raise ValueError(dd.columns, 23)
 
         return {
