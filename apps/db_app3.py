@@ -220,7 +220,7 @@ def displaySummaryByCategory(sector,company, inflation,benefits,salary,salaries)
         sector = "All Industries"
 
     if ( str(company) != 'None'):
-        df_temp = df_temp[df_temp.employer.str.encode('utf-8')==company.encode('utf-8')]
+        df_temp = df_temp[df_temp.employer==company.encode('utf-8')]
     else:
         company = "All Companies"
 
@@ -492,7 +492,7 @@ def cbg1_3( sector, company, inflation, benefits, salary, salaries):
         sector = "All Industries"
 
     if ( str(company) != 'None'):
-        df_temp = df_temp[df_temp.employer.str.encode('utf-8')==company.encode('utf-8')]
+        df_temp = df_temp[df_temp.employer==company.encode('utf-8')]
     else:
         company = "All Companies"
 
@@ -543,7 +543,7 @@ def cbg1_3( sector, company, inflation, benefits, salary, salaries):
         sector = "All Industries"
 
     if ( str(company) != 'None'):
-        df_temp = df_temp[df_temp.employer.str.encode('utf-8')==company.encode('utf-8')]
+        df_temp = df_temp[df_temp.employer==company.encode('utf-8')]
     else:
         company = "All Companies"
 
