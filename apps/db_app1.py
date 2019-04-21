@@ -130,7 +130,6 @@ layout = html.Div(children=[
     Output(component_id='companies_select', component_property= 'options'),
     [Input(component_id='sector_select', component_property='value')])
 def call1(value):
-
     temp = db_app.df[db_app.df._sector==value]
     options=[]
     ret1 = temp.employer.unique()
@@ -144,7 +143,7 @@ def call1(value):
     Output(component_id='companies_select', component_property='value'),
     [Input(component_id='sector_select', component_property='value')])
 def call2(value):
-    return 'None'
+    return None
 
 
 #################################################################################
@@ -163,6 +162,9 @@ def call2(value):
 def clean_data(sector,value1, company, position, inflation, benefits, salary, salaries):
 
     df_temp = db_app.df.copy()
+    
+
+
 
     if position!='' and position!= None:
         if position=='chief':
@@ -177,8 +179,8 @@ def clean_data(sector,value1, company, position, inflation, benefits, salary, sa
     else:
         sector = "All Industries"
 
-    if ( str(company) != 'None'):
-        df_temp = df_temp[df_temp.employer==company.encode('utf-8')]
+    if ( company != None):
+        df_temp = df_temp[df_temp.employer==company]
     else:
         company = "All Companies"
 

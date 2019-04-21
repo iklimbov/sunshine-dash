@@ -219,8 +219,8 @@ def displaySummaryByCategory(sector,company, inflation,benefits,salary,salaries)
     else:
         sector = "All Industries"
 
-    if ( str(company) != 'None'):
-        df_temp = df_temp[df_temp.employer==company.encode('utf-8')]
+    if ( company != None):
+        df_temp = df_temp[df_temp.employer==company]
     else:
         company = "All Companies"
 
@@ -491,8 +491,8 @@ def cbg1_3( sector, company, inflation, benefits, salary, salaries):
     else:
         sector = "All Industries"
 
-    if ( str(company) != 'None'):
-        df_temp = df_temp[df_temp.employer==company.encode('utf-8')]
+    if ( company != None):
+        df_temp = df_temp[df_temp.employer==company]
     else:
         company = "All Companies"
 
@@ -542,8 +542,8 @@ def cbg1_3( sector, company, inflation, benefits, salary, salaries):
     else:
         sector = "All Industries"
 
-    if ( str(company) != 'None'):
-        df_temp = df_temp[df_temp.employer==company.encode('utf-8')]
+    if ( company != None):
+        df_temp = df_temp[df_temp.employer==company]
     else:
         company = "All Companies"
 
@@ -592,11 +592,11 @@ def call1_3(value):
         options.append({'label': i, 'value': i})
     return options
 
-# @app.callback(
-#     Output(component_id='companies_select3', component_property='value'),
-#     [Input(component_id='sector_select3', component_property='value')])
-# def call2_3(value):
-#     return 'None'
+@app.callback(
+    Output(component_id='companies_select3', component_property='value'),
+    [Input(component_id='sector_select3', component_property='value')])
+def call2_3(value):
+    return None
 
 
 
