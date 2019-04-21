@@ -1,7 +1,6 @@
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from flask import send_from_directory
 import logging
 import gunicorn
 
@@ -10,47 +9,32 @@ import flask
 
 import db_app
 from db_app import app
-from apps import db_app1, db_app2, tabs
+from apps import tabs
 
-
+# app and server made available here for Flask to run
 app = db_app.app
 server = app.server
 
-gunicorn_error_logger = logging.getLogger('gunicorn.error')
-app.logger.handlers.extend(gunicorn_error_logger.handlers)
-# app.logger.setLevel(logging.DEBUG)
-# app.logger.debug('this will show in the log')
+# app.logger.debug("this is a DEBUG message")
+# app.logger.info("this is an INFO message")
+# app.logger.warning("this is a WARNING message")
+# app.logger.error("this is an ERROR message")
+# app.logger.critical("this is a CRITICAL message")
 
-
+# main page layout
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     html.Div(id='page-content')
 ])
 
-
-
+# we only have one page at the moment, with multile tabs
 @app.callback(Output('page-content', 'children'),
               [Input('url', 'pathname')])
 def display_page(pathname):
-    if pathname == '/apps/db_app1':
-         return db_app1.layout
-    elif pathname == '/apps/db_app2':
+    if pathname == '/':
          return tabs.layout
     else:
         return '404'
-
-css_directory = os.getcwd()
-stylesheets = ['sunshine.css']
-static_css_route = '/static/assests/'
-
-
-@app.server.route('{}<stylesheet>'.format(static_css_route))
-def serve_stylesheet(stylesheet):
-    return flask.send_from_directory(css_directory+"/assests/", stylesheet)
-
-
-for stylesheet in stylesheets:
-    app.css.append_css({"external_url": static_css_route+"{}".format(stylesheet)})
 
 if __name__ == '__main__':
     app.run_server(debug=True)

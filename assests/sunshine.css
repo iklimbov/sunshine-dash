@@ -68,7 +68,6 @@ td, th {
     padding: 0 1em 0 0;
 }
 
-
 /*TABS*/
 
 .tab {
@@ -102,17 +101,6 @@ td, th {
 #generate_button:hover{
 	background-color: #4365a5;
 }
-
-/*.g-gtitle{
-	margin: 1em;
-	padding: 1em;
-}
-
-.gtitle{
-	font-size: 200%;
-	margin: 1em;
-	padding: 1em;
-}*/
 
 input[type=checkbox], input[type=radio] {
     margin: 10px;

@@ -1,18 +1,10 @@
-import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-import plotly.graph_objs as go
-import plotly.plotly as py
-import os
-import copy
-import time
-import datetime
-import json
 
 import numpy as np
 import pandas as pd
-from flask_caching import Cache
+import json
 
 from db_app import app
 import db_app
@@ -70,7 +62,8 @@ layout = html.Div(children=[
                       html.H5(children='Industry (leave blank for all):'),
                       dcc.Dropdown(
                                   id='sector_select',
-                                  options=[{'label': i, 'value': i} for i in db_app.SECTORS]
+                                  options=[{'label': i, 'value': i} for i in db_app.SECTORS],
+                                  value = None
                   )]),
                   html.Div([
                       html.H5(children='Company (leave blank for all):'),
@@ -94,8 +87,7 @@ layout = html.Div(children=[
                     dcc.Graph(id='stacked_area',className=''),
                     ],style={'margin':0}),
         ],className='col-sm-4'),
-    ],className='container-fluid well'),  
-
+    ],className='container-fluid well'), 
     html.Div([
         html.Div ([
            dcc.Graph(id='graph_counts',className=''),
@@ -109,15 +101,11 @@ layout = html.Div(children=[
         html.Div([
             html.Div([
                  html.Div(id='results_box',className='summary') 
-
             ],className=['container-fluid']),
         ],className='col-sm-4'),
         html.Div([
             html.Div(id='sector_avg_box', className='summary'),
         ],className='col-sm-8'),
-        # html.Div([
-        #     html.Div(id='results_box', className='summary'),
-        # ],className='col-sm-3'),
     ],className='container-fluid'),
     html.Div(id='intermediate-value',style={'display': 'None'}),
 ])
@@ -125,6 +113,10 @@ layout = html.Div(children=[
 
 ###############################################################################
 # CALLBACKS
+###############################################################################
+
+###############################################################################
+# List of companies for this sector 
 ###############################################################################
 @app.callback(
     Output(component_id='companies_select', component_property= 'options'),
@@ -139,15 +131,10 @@ def call1(value):
         options.append({'label': i, 'value': i})
     return options
 
-@app.callback(
-    Output(component_id='companies_select', component_property='value'),
-    [Input(component_id='sector_select', component_property='value')])
-def call2(value):
-    return None
-
-
 #################################################################################
 # DATA PREPARATION
+# get records based on selected parameters and dump them into intermediate-value
+# text field, from there those records will be used to create graphs on this tab
 #################################################################################
 @app.callback(
     Output('intermediate-value', 'children'),
@@ -159,12 +146,9 @@ def call2(value):
     Input(component_id='include_benefits', component_property='values'),
     Input(component_id='include_salary', component_property='values'),
     Input(component_id='salary_slider', component_property='value')])
-def clean_data(sector,value1, company, position, inflation, benefits, salary, salaries):
+def clean_data(sector,years, company, position, inflation, benefits, salary, salaries):
 
     df_temp = db_app.df.copy()
-    
-
-
 
     if position!='' and position!= None:
         if position=='chief':
@@ -172,7 +156,6 @@ def clean_data(sector,value1, company, position, inflation, benefits, salary, sa
         else :
             df_temp=df_temp[df_temp.job_category1==position]
         
-    # raise ValueError(df_temp.shape[0], 23)
     if (sector != None):
         df_temp = df_temp[df_temp._sector == sector]
         # raise ValueError(df_temp.shape, 23)
@@ -192,8 +175,8 @@ def clean_data(sector,value1, company, position, inflation, benefits, salary, sa
         if earn_column=="":
             return ""
 
-        df_temp =  df_temp[df_temp.c_year >= int(value1[0])]
-        df_temp =  df_temp[df_temp.c_year <= int(value1[1])]
+        df_temp =  df_temp[df_temp.c_year >= int(years[0])]
+        df_temp =  df_temp[df_temp.c_year <= int(years[1])]
 
         if df_temp.shape[0]==0 :
             return ""
@@ -220,66 +203,11 @@ def clean_data(sector,value1, company, position, inflation, benefits, salary, sa
 
         return json.dumps(datasets)    
 
-# @app.callback(
-#     Output(component_id='summary_box', component_property='children'),
-#     [Input(component_id='sector_select', component_property='value'),
-#     Input(component_id='year_slider', component_property='value'), 
-#     Input(component_id='companies_select', component_property='value'),
-#     Input(component_id='position_select', component_property='value'),
-#     Input(component_id='inflation_ajust', component_property='values'),
-#     Input(component_id='include_benefits', component_property='values'),
-#     Input(component_id='include_salary', component_property='values'),
-#     Input(component_id='salary_slider', component_property='value')])
-# def displayParameterSummary(sector,value1, company, position, inflation, benefits, salary, salaries):
-#     if sector==None:
-#         sector = "All Industries"
-#     if company==None or company=='None':
-#         company = "All Companies"
-#     if len(inflation)==0:
-#         inflation=['Not Adjusted']
-#     else:
-#         inflation=['Adjusted']
-#     if len(benefits)==0:
-#         benefits='Not Included'
-#     else:
-#         benefits='Included'
-#     if len(salary)==0:
-#         salary='Not Included'
-#     else:
-#         salary='Included'
-
-#     if position =='none':
-#         position = 'All positions'
-#     elif position=='chief':
-#         position = 'Chiefs'
-#     elif position=='vp':
-#         position = 'VPs'
-#     elif position=='ceo':
-#         position = 'CEOs'
-#     elif position=='cfo':
-#         position = 'CFOs'
-#     elif position=='cto':
-#         position = 'CTOs'
-#     elif position=='chro':
-#         position = 'CHROs'
-
-#     temp = []
-#     temp.append(["Years", str(value1[0]) + " - " + str(value1[1])])
-#     if (salaries[1]==600000):
-#         temp.append(["Salary Range", "from " + "{:,}".format(salaries[0]) ])
-#     else:
-#         temp.append(["Salary Range", "{:,}".format(salaries[0]) + " - " + "{:,}".format(salaries[1])])
-
-#     temp.append(["Industry", str(sector)])
-#     temp.append(["Company", str(company)])
-#     temp.append(["Positions", position])
-#     temp.append(["Adjusted to Inflation", str(inflation[0])])
-#     temp.append(["Base Salary Included", str(salary)])
-#     temp.append(["Benefits Included", str(benefits)])
-#     temp_df = pd.DataFrame(temp)
-
-#     return fun.generate_table(temp_df, title = 'Parameters Summary',display_columns=False)
-
+#################################################################################
+# SECTOR AVG are displaied at the bottom of the page.
+# They are not dependant on selection of sector or the company, so not updated 
+# too often.
+#################################################################################
 @app.callback(
     Output(component_id='sector_avg_box', component_property='children'),
     [Input(component_id='inflation_ajust', component_property='values'),
@@ -290,45 +218,41 @@ def displaySectorSummary(inflation, benefits, salary, salaries):
 
     df_temp = db_app.df[db_app.df.c_year==db_app.CURRENT_YEAR]
 
-    if df_temp.shape[0]==0:
+    earn_column = fun.get_earnings_column(inflation, salary, benefits)
+    if earn_column=="":
         return ""
-    else:
+    if df_temp.shape[0]==0 :
+        return ""
 
-        earn_column = fun.get_earnings_column(inflation, salary, benefits)
-        if earn_column=="":
+    df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
+    if (salaries[1]<600000):
+        df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
+
+    if df_temp.shape[0]==0:
             return ""
 
-        if df_temp.shape[0]==0 :
-            return ""
+    df_temp = pd.DataFrame(df_temp.groupby(['_gender_x','_sector']).agg({'first_name':len, earn_column:np.mean}))
+    df_temp.reset_index(inplace=True)
+    df_m= df_temp[df_temp._gender_x.astype(str)=='male']
+    df_f= df_temp[df_temp._gender_x.astype(str)=='female']
+    dd = pd.merge(df_m,df_f, how='outer', left_on='_sector', right_on="_sector")
+    dd.drop(columns=['_gender_x_x','_gender_x_y'],inplace=True)
+    dd.columns = ['_sector','m_count','m_salary','f_count','f_salary']
 
-        df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
-        if (salaries[1]<600000):
-            df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
+    dd['per_female'] = fun.get_f_count_number(dd.f_count, dd.m_count)
 
-        if df_temp.shape[0]==0:
-                return ""
+    dd['per_female_salary'] = fun.get_f_count_number(dd.f_salary, dd.m_salary)
 
-        df_temp = pd.DataFrame(df_temp.groupby(['_gender_x','_sector']).agg({'first_name':len, earn_column:np.mean}))
-        df_temp.reset_index(inplace=True)
-        df_m= df_temp[df_temp._gender_x.astype(str)=='male']
-        df_f= df_temp[df_temp._gender_x.astype(str)=='female']
-        dd = pd.merge(df_m,df_f, how='outer', left_on='_sector', right_on="_sector")
-        dd.drop(columns=['_gender_x_x','_gender_x_y'],inplace=True)
-        dd.columns = ['_sector','m_count','m_salary','f_count','f_salary']
-
-        dd['per_female'] = fun.get_f_count_number(dd.f_count, dd.m_count)
-        # dd.apply(lambda x: x.f_count/(x.f_count+x.m_count)*100, axis=1)
-        dd['per_female_salary'] = 0
-
-        dd['per_female_salary'] = fun.get_f_count_number(dd.f_salary, dd.m_salary)
-        # dd.apply(lambda x: x.f_salary/(x.f_salary+x.m_salary)*100, axis=1)
-
-        dd = dd.reindex(columns=['_sector','m_count','f_count','per_female','m_salary','f_salary','per_female_salary'])
-        dd.fillna(0, inplace=True)
-        dd.columns = ['Industry','# of Male','# of Female', '% of Female','Male Earnings','Female Earnings','% of Female Earnings']
+    dd = dd.reindex(columns=['_sector','m_count','f_count','per_female','m_salary','f_salary','per_female_salary'])
+    dd.fillna(0, inplace=True)
+    dd.columns = ['Industry','# of Male','# of Female', '% of Female','Male Earnings','Female Earnings','% of Female Earnings']
 
     return fun.generate_table(dd, title='Averages by Industry for '+ str(db_app.CURRENT_YEAR),  dtypes = ["","num","num","per","dol","dol","per"])
 
+
+#################################################################################
+# RESULTS BOX is a small summary of the graphs, populated from the same data dump
+#################################################################################
 @app.callback(
     Output(component_id='results_box', component_property='children'),
     [Input('intermediate-value', 'children')])
@@ -377,6 +301,10 @@ def displayGraphSummary(value):
 # CALLBACKS: GRAPHS
 ###############################################################################
 
+
+###############################################################################
+# Small area graph at the top of the page, kind of summary view of data
+###############################################################################
 @app.callback(
     Output(component_id='stacked_area', component_property='figure'),
     [Input('intermediate-value', 'children')])
@@ -390,7 +318,7 @@ def call3_stacked_area(value):
     df_m= pd.read_json(datasets['df_m'], orient='split')
     df_f= pd.read_json(datasets['df_f'], orient='split')
 
-    xx =  {
+    return  {
             'data': [
                 {'x': df_m.c_year, 'y': df_m.first_name,  'name': 'Male','stackgroup':'one','fillcolor':db_app.COLORS['cmale']},
                 {'x': df_f.c_year, 'y': df_f.first_name,  'name': 'Female','stackgroup':'one','fillcolor':db_app.COLORS['cfemale']},
@@ -410,8 +338,11 @@ def call3_stacked_area(value):
                         )
                     }
             }
-    return xx
 
+
+###############################################################################
+# Graph representation of female vs male counts by year
+###############################################################################
 @app.callback(
     Output(component_id='graph_counts', component_property='figure'),
     [Input('intermediate-value', 'children')])
@@ -448,6 +379,10 @@ def call3(value):
             }
         }
 
+
+###############################################################################
+# Graph representation of female vs male earnings by year
+###############################################################################
 @app.callback(
     Output(component_id='graph_salaries', component_property='figure'),
     [Input('intermediate-value', 'children')])

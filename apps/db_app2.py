@@ -1,30 +1,20 @@
-import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-import os
-import copy
-import time
-import datetime
-import json
-
 import numpy as np
 import pandas as pd
-from flask_caching import Cache
+import json
 
 from db_app import app
 import db_app
 import functions as fun
 
 
-
 ###############################################################################
 # HTML layout
 ###############################################################################
 layout = html.Div(children=[
-
-
     html.Div([
         html.Div([
             html.Div([
@@ -66,9 +56,7 @@ layout = html.Div(children=[
                         options=[{'label': ii, 'value': i} for i, ii in zip(db_app.POSITIONS, db_app.POSITION_LABLES)],
                         value='',
                         clearable=True,
-
                    )]),
-                  
              ],className='container-fluid'),
         ],className='col-sm-3'),
         html.Div([
@@ -121,6 +109,11 @@ layout = html.Div(children=[
 ###############################################################################
 # CALLBACKS: GRAPHS
 ###############################################################################
+
+###############################################################################
+# Distribution graph - all sectors
+# takes into account earnings columns and position
+###############################################################################
 @app.callback(
     Output(component_id='dist_graph', component_property='figure'),
     [Input(component_id='position_select2', component_property='value'),
@@ -164,6 +157,10 @@ def cbg1(position, inflation, benefits, salary, salaries):
 
     return fun.format_dist_graph_data(df_f, df_m, "Salary Distribution")
 
+###############################################################################
+# Distribution graph - for the selected sector
+# takes into account earnings columns and position
+###############################################################################
 @app.callback(
     Output(component_id='dist_graph1', component_property='figure'),
     [Input(component_id='sector_select2', component_property='value'),
@@ -174,14 +171,7 @@ def cbg1(position, inflation, benefits, salary, salaries):
     Input(component_id='salary_slider2', component_property='value')])
 def cbg2(sector, position, inflation, benefits, salary, salaries):
     if (sector==None):
-        return {
-                'layout': {
-                    'visible':'legendonly',
-                    'title': "All Companies for Selected Industry",
-                    'margin':{'t':'1em','r':1,'l':1,'b':20},
-                    'height': 600,
-                    'legend':{'orientation':"h"}
-                }}
+        return ""
 
     df_temp = db_app.df18.copy()
 
@@ -223,6 +213,10 @@ def cbg2(sector, position, inflation, benefits, salary, salaries):
 
     return  fun.format_dist_graph_data(df_f, df_m, "Salary Distribution. " + sector)
 
+###############################################################################
+# Distribution graph - for the selected sector and company
+# takes into account earnings columns and position
+###############################################################################
 @app.callback(
     Output(component_id='dist_graph2', component_property='figure'),
     [Input(component_id='sector_select2', component_property='value'),
@@ -234,14 +228,7 @@ def cbg2(sector, position, inflation, benefits, salary, salaries):
     Input(component_id='salary_slider2', component_property='value')])
 def cbg3(sector, company, position, inflation, benefits, salary, salaries):
     if (company==None or sector==None or company=='None'):
-        return {
-        'layout': {
-            'visible':'legendonly',
-            'title': "Selected Company",
-            'margin':{'t':'1em','r':1,'l':1,'b':20},
-            'height': 600,
-            'legend':{'orientation':"h"}
-        }}
+        return ""
 
     df_temp = db_app.df18.copy()
 
@@ -253,7 +240,7 @@ def cbg3(sector, company, position, inflation, benefits, salary, salaries):
 
     if (sector != None):
         df_temp = df_temp[df_temp._sector == sector]
-        # raise ValueError(df_temp.shape, 23)
+
     else:
         sector = "All Industries"
 
@@ -288,7 +275,8 @@ def cbg3(sector, company, position, inflation, benefits, salary, salaries):
 
 
 ###############################################################################
-# SUMMARY BOX 1
+# SUMMARY BOX - for all sectors
+# takes into account earnings columns and position
 ###############################################################################
 @app.callback(
     Output(component_id='dist_summary1', component_property='children'),
@@ -325,10 +313,8 @@ def sb1_adjust( position, inflation, benefits, salary):
         except:
             pass
 
-
         df_temp = pd.DataFrame(df_temp.groupby(['_gender_x','quantiles']).agg({'first_name':len, 'salary_x':[np.mean,np.min,np.max], }))
         df_temp.reset_index(inplace=True)
-
 
         df_temp.columns=['_gender_x','quantiles','first_name','salary_x', 'salary_min', 'salary_max']
         df_temp.salary_x = df_temp.salary_x.astype(int)
@@ -336,7 +322,6 @@ def sb1_adjust( position, inflation, benefits, salary):
         df_temp.salary_max = df_temp.salary_max.astype(int)
 
         df_temp = pd.merge(df_temp[df_temp._gender_x=='female'],df_temp[df_temp._gender_x=='male'], how='inner',left_on='quantiles', right_on='quantiles' )
-        # df_temp['range'] = df_temp[['salary_min_x','salary_min_y']].min(axis=1).astype(str) + " - " + df_temp[['salary_max_x','salary_max_y']].max(axis=1).astype(str)
         df_temp['range'] = [i for i in range(1,df_temp.shape[0]+1)]
         
         df_temp['per_female'] = fun.get_f_count_number(df_temp.first_name_x, df_temp.first_name_y)
@@ -347,8 +332,10 @@ def sb1_adjust( position, inflation, benefits, salary):
     return fun.generate_table(df_temp, title = "Decile Summary.  All Industries", display_columns=True, 
         dtypes = ["","num","num","per","num","num","per"])
 
+
 ###############################################################################
-# SUMMARY BOX 2
+# SUMMARY BOX - for selected sector
+# takes into account earnings columns and position
 ###############################################################################
 @app.callback(
     Output(component_id='dist_summary2', component_property='children'),
@@ -402,21 +389,22 @@ def sb2_adjust(sector, position, inflation, benefits, salary):
         df_temp.salary_min = df_temp.salary_min.astype(int)
         df_temp.salary_max = df_temp.salary_max.astype(int)
         df_temp = pd.merge(df_temp[df_temp._gender_x=='female'],df_temp[df_temp._gender_x=='male'], how='inner',left_on='quantiles', right_on='quantiles' )
-        # df_temp['range'] = df_temp[['salary_min_x','salary_min_y']].min(axis=1).astype(str) + " - " + df_temp[['salary_max_x','salary_max_y']].max(axis=1).astype(str)
+
         df_temp['range'] = [i for i in range(1,df_temp.shape[0]+1)]
 
         df_temp['per_female'] = fun.get_f_count_number(df_temp.first_name_x, df_temp.first_name_y)
         df_temp['per_female_salary'] = fun.get_f_count_number(df_temp.salary_x_x, df_temp.salary_x_y)
         df_temp = df_temp[['range','first_name_x','first_name_y','per_female','salary_x_x','salary_x_y', 'per_female_salary']]
         df_temp.columns = ['Decile','# of Female','# of Male','% of Female','Salary Female','Salary Male','% of Female Salary']
-        # raise ValueError(df_temp.shape, 23)
-
 
     return fun.generate_table(df_temp, title = "Decile Summary. " + str(sector), display_columns=True,
         dtypes = ["","num","num","per","num","num","per"])
 
+
+
 ###############################################################################
-# SUMMARY BOX 3
+# SUMMARY BOX - for selected company
+# takes into account earnings columns and position
 ###############################################################################
 @app.callback(
     Output(component_id='dist_summary3', component_property='children'),
@@ -475,7 +463,6 @@ def sb3_adjust(sector, company, position, inflation, benefits, salary):
         df_temp.salary_max = df_temp.salary_max.astype(int)
 
         df_temp = pd.merge(df_temp[df_temp._gender_x=='female'],df_temp[df_temp._gender_x=='male'], how='inner',left_on='quantiles', right_on='quantiles' )
-        # df_temp['range'] = df_temp[['salary_min_x','salary_min_y']].min(axis=1).astype(str) + " - " + df_temp[['salary_max_x','salary_max_y']].max(axis=1).astype(str)
         df_temp['range'] = [i for i in range(1,df_temp.shape[0]+1)]
 
         df_temp['per_female'] = fun.get_f_count_number(df_temp.first_name_x, df_temp.first_name_y)
@@ -503,11 +490,7 @@ def call1(value):
         options.append({'label': i, 'value': i})
     return options
 
-@app.callback(
-    Output(component_id='companies_select2', component_property='value'),
-    [Input(component_id='sector_select2', component_property='value')])
-def call2(value):
-    return None
+
 
 
 

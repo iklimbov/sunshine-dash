@@ -1,17 +1,10 @@
-import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-import os
-import copy
-import time
-import datetime
-import json
-
 import numpy as np
 import pandas as pd
-from flask_caching import Cache
+import json
 
 from db_app import app
 import db_app
@@ -74,7 +67,6 @@ layout = html.Div(children=[
                   ]),
             ],className='col-sm-3'),
         html.Div([
-            # html.Div( id='message_box',className = ['alert alert-info col-sm-12']),
             html.Div([
                 html.Div ([
                    dcc.Graph(id='company_pie1', ),
@@ -106,10 +98,7 @@ layout = html.Div(children=[
         ],className='container-fluid'),
     ],className=['col-sm-6 container-fluid']),
 
-
-
     html.Div([
-
         html.Div([
             html.Div([
                 html.Div ([
@@ -123,18 +112,12 @@ layout = html.Div(children=[
             ],className= ['col-sm-8']),
         ],className='container-fluid well'),
     ],className=['col-sm-6 container-fluid']),
-
-
-    # html.Div(id='intermediate-value4',style={'display': 'block'}),
 ])
 
 
-# @app.callback(
-#     Output(component_id='generate_button-value4', component_property='n_clicks'),
-#     [ Input(component_id='companies_select4', component_property='value'),])
-# def company_was_changed(company):
-#     return 1
-
+###############################################################################
+# Update title of the report
+###############################################################################
 @app.callback(
     Output(component_id='company_title', component_property='children'),
     [ Input(component_id='generate_button', component_property='n_clicks'),],
@@ -145,14 +128,10 @@ def update_company(n,company):
     else:
         return company + " Summary"
 
-# @app.callback(
-#     Output(component_id='company_title', component_property='children'),
-#     [ Input(component_id='companies_select4', component_property='value'),])
-# def update_company(company):
-#     if company == None or company== "":
-#         return ""
 
-
+###############################################################################
+# STACKED GRAPH - by job category 
+###############################################################################
 @app.callback(
     Output(component_id='company_by_jobs_graph', component_property='figure'),
     [ Input(component_id='generate_button', component_property='n_clicks'),],
@@ -169,7 +148,7 @@ def cbg1_3(n, company, inflation, benefits, salary, salaries):
     df_temp=df[df.employer==company]
 
     if df_temp.shape[0]==0:
-        return {}
+        return ""
     else:
         earn_column = fun.get_earnings_column(inflation, salary, benefits)
         if earn_column=="":
@@ -227,124 +206,11 @@ def cbg1_3(n, company, inflation, benefits, salary, salaries):
                 'xaxis':dict(showticklabels=False,gridcolor='white', gridwidth=0.5)
             }
         }
-    # return fun.format_h_stack_graph_data(df_f,df_m, 'job_category1','first_name', '# of Employees by Job Category', 650)
 
-@app.callback(
-    Output(component_id='company_pie1', component_property='figure'),
-    [ Input(component_id='generate_button', component_property='n_clicks'),],
-    [State(component_id='companies_select4', component_property='value'),
-    State(component_id='inflation_ajust4', component_property='values'),
-    State(component_id='include_benefits4', component_property='values'),
-    State(component_id='include_salary4', component_property='values'),
-    State(component_id='salary_slider4', component_property='value')])
-def company_pie1_generate(n, company, inflation, benefits, salary, salaries):
-    if (company == "" or company==None):
-        return ""
-    df_temp=df[df.employer==company]
 
-    if df_temp.shape[0]==0:
-        return {}
-    else:
-        earn_column = fun.get_earnings_column(inflation, salary, benefits)
-        if earn_column=="":
-            return {}
-
-        if df_temp.shape[0]==0 :
-            return {}
-
-        df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
-        if (salaries[1]<600000):
-            df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
-
-        if df_temp.shape[0]==0:
-                return ""
-
-        df_m= df_temp[df_temp._gender_x.astype(str)=='male']
-        df_f= df_temp[df_temp._gender_x.astype(str)=='female']
-        ret =  {
-                'data': [
-                    {'values': [ int(df_m.shape[0]), int(df_f.shape[0])], 'type': 'pie', 'hoverinfo':'skip',
-                    'labels': ['',''],'textfont':{'size':'120%'},'text':['Male: '+ "{:,}".format(df_m.shape[0]),'Female: ' + "{:,}".format(df_f.shape[0])],
-                    'marker':{'colors':[db_app.COLORS['cmale'],db_app.COLORS['cfemale']]}},
-                ],
-                'layout': {
-                    'plot_bgcolor': '#f5f5f5',
-                    'paper_bgcolor': '#f5f5f5',
-                    'title': "Counts",
-                    'font': {
-                        # 'color': db_app.COLORS['text'],
-                        'size':'120%'},
-                    'margin':{'t':25,'r':0,'l':0,'b':0},
-                    'height': 200,
-                    'legend':{'orientation':"h"},
-                    'showlegend':False,
-                }
-            }
-        return ret
-
-@app.callback(
-    Output(component_id='company_pie2', component_property='figure'),
-    [ Input(component_id='generate_button', component_property='n_clicks'),],
-    [State(component_id='companies_select4', component_property='value'),
-    State(component_id='inflation_ajust4', component_property='values'),
-    State(component_id='include_benefits4', component_property='values'),
-    State(component_id='include_salary4', component_property='values'),
-    State(component_id='salary_slider4', component_property='value')])
-def company_pie2_generate(n, company, inflation, benefits, salary, salaries):
-    if (company == "" or company==None):
-        return ""
-
-    df_temp=df[df.employer==company]
-
-    if df_temp.shape[0]==0:
-        return {}
-    else:
-        earn_column = fun.get_earnings_column(inflation, salary, benefits)
-        if earn_column=="":
-            return {}
-
-        if df_temp.shape[0]==0 :
-            return {}
-
-        df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
-        if (salaries[1]<600000):
-            df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
-
-        if df_temp.shape[0]==0:
-                return ""
-
-        df_m= df_temp[df_temp._gender_x.astype(str)=='male']
-        df_f= df_temp[df_temp._gender_x.astype(str)=='female']
-        
-        m_mean = 0
-        if df_m.shape[0]>0:
-            m_mean = int(df_m[earn_column].mean())
-        f_mean = 0
-        if df_f.shape[0]>0:
-            f_mean = int(df_f[earn_column].mean())
-
-        ret =  {
-                'data': [
-                    {'values': [ m_mean, f_mean], 'type': 'pie', 'hoverinfo':'skip',
-                    'labels': ['',''],'textfont':{'size':'120%'},'text':[["$"+ "{:,}".format(m_mean)], "$"+ "{:,}".format(f_mean)],
-                    'marker':{'colors':[db_app.COLORS['cmale'],db_app.COLORS['cfemale']]}},
-                ],
-                'layout': {
-                    'plot_bgcolor': '#f5f5f5',
-                    'paper_bgcolor': '#f5f5f5',
-                    'title': "Avg Earnings",
-                    'font': {
-                        # 'color': db_app.COLORS['text'],
-                        'size':'120%'},
-                    'margin':{'t':25,'r':0,'l':0,'b':0},
-                    'height': 200,
-                    'legend':{'orientation':"h"},
-                    'showlegend':False,
-                    'textposition':'outside',
-                }
-            }
-        return ret
-
+###############################################################################
+# STACKED GRAPH - male vs female by earnings category
+###############################################################################
 @app.callback(
     Output(component_id='company_gr1', component_property='figure'),
     [ Input(component_id='generate_button', component_property='n_clicks'),],
@@ -437,53 +303,132 @@ def company_summary1_generate(n, company, inflation, benefits, salary, salaries)
         }
 
 
+###############################################################################
+# PIE - counts of female vs male
+###############################################################################
 @app.callback(
-    Output(component_id='ratings_all_summary', component_property='children'),
-    [Input(component_id='generate_button', component_property='n_clicks'),],
+    Output(component_id='company_pie1', component_property='figure'),
+    [ Input(component_id='generate_button', component_property='n_clicks'),],
     [State(component_id='companies_select4', component_property='value'),
-    State(component_id='sector_select4', component_property='value')])
-def ratings_all_summary(n, company, sector):
-
-    if (company == "" or company==None or sector== "" or sector == None):
+    State(component_id='inflation_ajust4', component_property='values'),
+    State(component_id='include_benefits4', component_property='values'),
+    State(component_id='include_salary4', component_property='values'),
+    State(component_id='salary_slider4', component_property='value')])
+def company_pie1_generate(n, company, inflation, benefits, salary, salaries):
+    if (company == "" or company==None):
         return ""
-
-    df_temp=df[df._sector==sector]
+    df_temp=df[df.employer==company]
 
     if df_temp.shape[0]==0:
-        return ""
+        return {}
     else:
-        # 
-        df_temp = pd.DataFrame(df_temp.groupby(['employer']).agg({'avg_indeed_score':np.max,'num_reviews':np.max
-            ,'culture':np.max, 'work_life':np.max}))
-        df_temp.reset_index(inplace=True)
-        df_temp.sort_values(by=['avg_indeed_score','num_reviews'], ascending=False, inplace=True)
-        df_temp.index=range(1,df_temp.shape[0]+1)
-        df_temp.reset_index(inplace=True)
+        earn_column = fun.get_earnings_column(inflation, salary, benefits)
+        if earn_column=="":
+            return {}
 
-        df_temp.columns = ['Rank','Company','Avg Score', '# of Reviews', 'Culture','Work/Life Balance']
+        if df_temp.shape[0]==0 :
+            return {}
 
-        ranks = df_temp[df_temp.Company==company].Rank.tolist()
-        my_rank = 0
-        if df_temp.shape[0]>0:
-            my_rank = ranks[0] -1
-        else:
-            return ""
+        df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
+        if (salaries[1]<600000):
+            df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
 
-        highlight_row = my_rank
-        company_count = df_temp.shape[0]
+        if df_temp.shape[0]==0:
+                return ""
 
-        if my_rank > 9:
-            df_temp = df_temp[:9].append(df_temp.iloc[my_rank])
-            highlight_row = 9
-        else:
-            df_temp = df_temp[:10]
+        df_m= df_temp[df_temp._gender_x.astype(str)=='male']
+        df_f= df_temp[df_temp._gender_x.astype(str)=='female']
+        ret =  {
+                'data': [
+                    {'values': [ int(df_m.shape[0]), int(df_f.shape[0])], 'type': 'pie', 'hoverinfo':'skip',
+                    'labels': ['',''],'textfont':{'size':'120%'},'text':['Male: '+ "{:,}".format(df_m.shape[0]),'Female: ' + "{:,}".format(df_f.shape[0])],
+                    'marker':{'colors':[db_app.COLORS['cmale'],db_app.COLORS['cfemale']]}},
+                ],
+                'layout': {
+                    'plot_bgcolor': '#f5f5f5',
+                    'paper_bgcolor': '#f5f5f5',
+                    'title': "Counts",
+                    'font': {
+                        # 'color': db_app.COLORS['text'],
+                        'size':'120%'},
+                    'margin':{'t':25,'r':0,'l':0,'b':0},
+                    'height': 200,
+                    'legend':{'orientation':"h"},
+                    'showlegend':False,
+                }
+            }
+        return ret
 
-        # raise ValueError(my_rank, 23)
+###############################################################################
+# PIE - earnings of female vs male
+###############################################################################
+@app.callback(
+    Output(component_id='company_pie2', component_property='figure'),
+    [ Input(component_id='generate_button', component_property='n_clicks'),],
+    [State(component_id='companies_select4', component_property='value'),
+    State(component_id='inflation_ajust4', component_property='values'),
+    State(component_id='include_benefits4', component_property='values'),
+    State(component_id='include_salary4', component_property='values'),
+    State(component_id='salary_slider4', component_property='value')])
+def company_pie2_generate(n, company, inflation, benefits, salary, salaries):
+    if (company == "" or company==None):
+        return ""
 
-        return fun.generate_table(df_temp, title = "Industry Ranking ("+str(company_count)+" companies ranked)", display_columns=True, highlight_row =highlight_row)
-            # dtypes = ["","num","num","per","num","num","per"])
+    df_temp=df[df.employer==company]
+
+    if df_temp.shape[0]==0:
+        return {}
+    else:
+        earn_column = fun.get_earnings_column(inflation, salary, benefits)
+        if earn_column=="":
+            return {}
+
+        if df_temp.shape[0]==0 :
+            return {}
+
+        df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
+        if (salaries[1]<600000):
+            df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
+
+        if df_temp.shape[0]==0:
+                return ""
+
+        df_m= df_temp[df_temp._gender_x.astype(str)=='male']
+        df_f= df_temp[df_temp._gender_x.astype(str)=='female']
+        
+        m_mean = 0
+        if df_m.shape[0]>0:
+            m_mean = int(df_m[earn_column].mean())
+        f_mean = 0
+        if df_f.shape[0]>0:
+            f_mean = int(df_f[earn_column].mean())
+
+        ret =  {
+                'data': [
+                    {'values': [ m_mean, f_mean], 'type': 'pie', 'hoverinfo':'skip',
+                    'labels': ['',''],'textfont':{'size':'120%'},'text':[["$"+ "{:,}".format(m_mean)], "$"+ "{:,}".format(f_mean)],
+                    'marker':{'colors':[db_app.COLORS['cmale'],db_app.COLORS['cfemale']]}},
+                ],
+                'layout': {
+                    'plot_bgcolor': '#f5f5f5',
+                    'paper_bgcolor': '#f5f5f5',
+                    'title': "Avg Earnings",
+                    'font': {
+                        # 'color': db_app.COLORS['text'],
+                        'size':'120%'},
+                    'margin':{'t':25,'r':0,'l':0,'b':0},
+                    'height': 200,
+                    'legend':{'orientation':"h"},
+                    'showlegend':False,
+                    'textposition':'outside',
+                }
+            }
+        return ret
 
 
+###############################################################################
+# Summary of this company's ratings
+###############################################################################
 @app.callback(
     Output(component_id='company_ratings_summary', component_property='children'),
     [Input(component_id='generate_button', component_property='n_clicks'),],
@@ -532,17 +477,63 @@ def company_ratings_summary_generate(n, company):
         return fun.generate_table(temp_df, title = "Ranking Summary", display_columns=False, highlight_row =1)
 
 
-@app.callback(
-    Output('message_box', 'children'),
-    [ Input(component_id='generate_button', component_property='n_clicks'),],
-    [State(component_id='companies_select4', component_property='value')])
 
-def generate_company_summary(clicks, company,):
-    # raise ValueError(company, 23)
-    if (company == "" or company==None):
-        return "Company Must be Selected. "
+###############################################################################
+# Ratings of the companies in this industry, currently selected company is 
+# highlighted
+###############################################################################
+@app.callback(
+    Output(component_id='ratings_all_summary', component_property='children'),
+    [Input(component_id='generate_button', component_property='n_clicks'),],
+    [State(component_id='companies_select4', component_property='value'),
+    State(component_id='sector_select4', component_property='value')])
+def ratings_all_summary(n, company, sector):
+
+    if (company == "" or company==None or sector== "" or sector == None):
+        return ""
+
+    df_temp=df[df._sector==sector]
+
+    if df_temp.shape[0]==0:
+        return ""
     else:
-        return "Select company and press Generate."
+        # 
+        df_temp = pd.DataFrame(df_temp.groupby(['employer']).agg({'avg_indeed_score':np.max,'num_reviews':np.max
+            ,'culture':np.max, 'work_life':np.max}))
+        df_temp.reset_index(inplace=True)
+        df_temp.sort_values(by=['avg_indeed_score','num_reviews'], ascending=False, inplace=True)
+        df_temp.index=range(1,df_temp.shape[0]+1)
+        df_temp.reset_index(inplace=True)
+
+        df_temp.columns = ['Rank','Company','Avg Score', '# of Reviews', 'Culture','Work/Life Balance']
+
+        ranks = df_temp[df_temp.Company==company].Rank.tolist()
+        my_rank = 0
+        if df_temp.shape[0]>0:
+            my_rank = ranks[0] -1
+        else:
+            return ""
+
+        highlight_row = my_rank
+        company_count = df_temp.shape[0]
+
+        if my_rank > 9:
+            df_temp = df_temp[:9].append(df_temp.iloc[my_rank])
+            highlight_row = 9
+        else:
+            df_temp = df_temp[:10]
+        return fun.generate_table(df_temp, title = "Industry Ranking ("+str(company_count)+" companies ranked)", display_columns=True, highlight_row =highlight_row)
+
+# @app.callback(
+#     Output('message_box', 'children'),
+#     [ Input(component_id='generate_button', component_property='n_clicks'),],
+#     [State(component_id='companies_select4', component_property='value')])
+# def generate_company_summary(clicks, company,):
+#     # raise ValueError(company, 23)
+#     if (company == "" or company==None):
+#         return "Company Must be Selected. "
+#     else:
+#         return "Select company and press Generate."
 
 
 
@@ -561,14 +552,3 @@ def call1_3(value):
     for i in ret1:
         options.append({'label': i, 'value': i})
     return options
-
-# @app.callback(
-#     Output(component_id='companies_select4', component_property='value'),
-#     [Input(component_id='sector_select4', component_property='value')])
-# def call2_3(value):
-#     return 'None'
-
-
-
-
-#        

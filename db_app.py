@@ -1,29 +1,37 @@
 import dash
 import pandas as pd
 
+import os
+import flask
+
+# init the app
 app = dash.Dash(__name__)
-
 app.config.suppress_callback_exceptions = True
-
 app.css.append_css({
     'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
 })
+
+# add custom css
+css_directory = os.getcwd()
+stylesheets = ['sunshine.css']
+static_css_route = '/static/assests/'
+
+@app.server.route('{}<stylesheet>'.format(static_css_route))
+def serve_stylesheet(stylesheet):
+    return flask.send_from_directory(css_directory+"/assests/", stylesheet)
+
+for stylesheet in stylesheets:
+    app.css.append_css({"external_url": static_css_route+"{}".format(stylesheet)})
 
 # external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 # external_stylesheets = ['https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css']
 # app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-
-
-# df =  pd.read_csv('data/2008_2018prod.csv')
-# df =  pd.read_csv('data/2008prod.csv')
-# df = pd.read_csv('https://s3.ca-central-1.amazonaws.com/sunshinelist/2008_2018prod.csv.bz2', compression='bz2', header=0, sep=',', quotechar='"')
-
-# df = pd.read_csv('data/2008_2018prod.csv.bz2', compression='bz2', header=0, sep=',', quotechar='"')
-
+# read data
 df = pd.read_csv('data/2008_2018_first_tab.csv.bz2', compression='bz2', header=0, sep=',', quotechar='"')
 df18 = pd.read_csv('data/2018prod.csv.bz2', compression='bz2', header=0, sep=',', quotechar='"')
 
+# global variables
 YEARS = [i for i in range(2008,2019)]
 
 SECTORS = ['Colleges',

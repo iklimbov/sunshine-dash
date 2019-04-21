@@ -1,22 +1,14 @@
-import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 
-import os
-import copy
-import time
-import datetime
-import json
-
 import numpy as np
 import pandas as pd
-from flask_caching import Cache
+import json
 
 from db_app import app
 import db_app
 import functions as fun
-
 
 
 ###############################################################################
@@ -53,7 +45,6 @@ layout = html.Div(children=[
                             
                 )],className=['col-sm-4'] ),
         ],className='col-sm-6'),
-
         html.Div ([
            dcc.Graph(id='summary_pie', ),
            
@@ -63,8 +54,7 @@ layout = html.Div(children=[
         ],className='col-sm-3'),
 
     ],className='container-fluid well'),  
-    html.Div([  
-        
+    html.Div([          
         html.Div([
             html.H3(children='Industries'),  
             html.Div([
@@ -128,7 +118,10 @@ layout = html.Div(children=[
 ])
 
 
-
+###############################################################################
+# SUMMARY BOX - for selected industry
+# takes into account earnings columns and position
+###############################################################################
 @app.callback(
     Output(component_id='summary_industries', component_property='children'),
     [Input(component_id='position_select3', component_property='value'),
@@ -200,6 +193,11 @@ def displaySummaryByIndustry(position, inflation,benefits,salary,salaries):
 
         return fun.generate_table(temp_df, title = "Industry Summary", display_columns=False)
 
+
+###############################################################################
+# SUMMARY BOX - for selected sector and campany
+# takes into account earnings columns
+###############################################################################
 @app.callback(
     Output(component_id='summary_categories', component_property='children'),
     [Input(component_id='sector_select3', component_property='value'),
@@ -287,6 +285,9 @@ def displaySummaryByCategory(sector,company, inflation,benefits,salary,salaries)
 ###############################################################################
 # CALLBACKS: GRAPHS
 ###############################################################################
+###############################################################################
+# PIE 1 - summary of counts of male vs female
+###############################################################################
 @app.callback(
     Output(component_id='summary_pie', component_property='figure'),
     [Input(component_id='inflation_ajust3', component_property='values'),
@@ -335,6 +336,10 @@ def cbg4_3( inflation, benefits, salary, salaries):
         }
     return ret
 
+
+###############################################################################
+# PIE 2 - summary of earnings of male vs female
+###############################################################################
 @app.callback(
     Output(component_id='summary_pie1', component_property='figure'),
     [Input(component_id='inflation_ajust3', component_property='values'),
@@ -385,6 +390,10 @@ def cbg4_4( inflation, benefits, salary, salaries):
         }
 
 
+###############################################################################
+# STACK GRAPH BY SECTOR - counts
+# takes into account earnings columns and position
+###############################################################################
 @app.callback(
     Output(component_id='gr_by_sector_counts', component_property='figure'),
     [Input(component_id='position_select3', component_property='value'),
@@ -429,6 +438,11 @@ def cbg1_3( position, inflation, benefits, salary, salaries):
         df_f= df_temp[df_temp._gender_x.astype(str)=='female']
     return fun.format_h_stack_graph_data(df_f,df_m, '_sector', 'first_name','Earnings by Industry', 450 )
 
+
+###############################################################################
+# STACK GRAPH BY SECTOR - earnings
+# takes into account earnings columns and position
+###############################################################################
 @app.callback(
     Output(component_id='gr_by_sector_salary', component_property='figure'),
     [Input(component_id='position_select3', component_property='value'),
@@ -471,6 +485,11 @@ def cbg2_3(position, inflation, benefits, salary, salaries):
 
     return fun.format_h_stack_graph_data(df_f,df_m, '_sector', 'salary_x','Earnings by Industry', 450 )
 
+
+###############################################################################
+# STACK GRAPH JOB CATEGORY - counts
+# takes into account earnings columns, sector and company
+###############################################################################
 @app.callback(
     Output(component_id='gr_by_job_counts', component_property='figure'),
     [Input(component_id='sector_select3', component_property='value'),
@@ -523,6 +542,11 @@ def cbg1_3( sector, company, inflation, benefits, salary, salaries):
         df_f= df_temp[df_temp._gender_x.astype(str)=='female']
     return fun.format_h_stack_graph_data(df_f,df_m, 'job_category1','first_name', '# of Employees by Job Category', 650)
 
+
+###############################################################################
+# STACK GRAPH JOB CATEGORY - earnings
+# takes into account earnings columns, sector and company
+###############################################################################
 @app.callback(
     Output(component_id='gr_by_job_salary', component_property='figure'),
     [Input(component_id='sector_select3', component_property='value'),
@@ -591,14 +615,6 @@ def call1_3(value):
     for i in ret1:
         options.append({'label': i, 'value': i})
     return options
-
-@app.callback(
-    Output(component_id='companies_select3', component_property='value'),
-    [Input(component_id='sector_select3', component_property='value')])
-def call2_3(value):
-    return None
-
-
 
 
 #        
