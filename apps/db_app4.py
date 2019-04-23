@@ -105,11 +105,11 @@ layout = html.Div(children=[
 
     html.Div ([
         html.Div ([
-           dcc.Graph(id='company_gr1'),
+           dcc.Graph(id='company_by_jobs_graph'),
         ],className='container-fluid'),
         html.H2(""),
         html.Div ([
-            dcc.Graph(id='company_by_jobs_graph', ),
+            dcc.Graph(id='company_gr1', ),
         ],className='container-fluid'),
     ],id='graphs',className=['col-sm-4 container-fluid']),
 
