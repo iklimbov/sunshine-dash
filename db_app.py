@@ -65,3 +65,8 @@ COLORS = {
     'cmale':'#4363d8',
     'cfemale': '#f58231'
 }
+
+SORT_RATINGS_LABLES =['Average Rating', 'Culture',
+        'Work, Life Balance', 'Salary, benefits', "Job Security, Advancement", 'Mgmt', 'CEO approval']
+
+SORT_RATINGS= ['avg_indeed_score','culture', 'work_life', 'salary','job_security', 'management', 'ceo']

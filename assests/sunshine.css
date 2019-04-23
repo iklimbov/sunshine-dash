@@ -21,22 +21,26 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h3{
-	font-size: 300%;
+	font-size: 160%;
 	text-align: center;	
 }
 h2{
-	font-size: 300%;
+	font-size: 200%;
 	text-align: center;	
 	/*padding-left: 1em;*/
 }
 h1{
-	font-size: 500%;
+	font-size: 300%;
 	text-align: center;
 }
 .app-header {
     height: 60px;
     line-height: 60px;
     border-bottom: thin lightgrey solid;
+}
+
+.container-fluid{
+	margin-bottom: 1em;
 }
 
 .app-header .app-header--title {
@@ -48,14 +52,16 @@ h1{
 	background-color: #333333;
 	color: white;
 	padding: 1em;
-	margin: 1em 0 0 0;
+	margin: 0 0 1em 0;
 }
 
 .ratings_summary {
 	background-color: #333333;
 	color: white;
-	padding: 1em;
-	margin: 0;
+/*	padding: 1em;*/
+	border-color: white;
+	border-style: solid;
+	border-width: 2;
 }
 .ratings_summary h4 {
 	color: #7fdbff;
@@ -71,19 +77,30 @@ td, th {
 /*TABS*/
 
 .tab {
-	font-size: 200%;
+	font-size: 160%;
 	color: silver;
+	/*background-color: yellow;*/
 }
 
 .tab--selected {
-	font-size: 200%;
+	font-size: 160%;
 	border-right: 10px solid #d6d6d6;
+	/*background-color: yellow;*/
 }
+
 
 /*highlight one row in the table*/
 .highlight_row {
 	background-color: #e6194B;
 	color: white;
+}
+
+.red_field {
+	color: red;
+}
+
+.green_field {
+	color: 	#00ff00;
 }
 
 #generate_button{
@@ -102,8 +119,18 @@ td, th {
 	background-color: #4365a5;
 }
 
+.modebar-container{
+	display: none;
+}
+
 input[type=checkbox], input[type=radio] {
     margin: 10px;
-    margin-top: 1px\9;
+    margin-top: 1px;
     line-height: normal;
-
+    width: 20px; 
+    height: 20px;
+    font-size: 120%;
+/*    cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;*/
+}

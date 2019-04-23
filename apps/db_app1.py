@@ -38,75 +38,78 @@ layout = html.Div(children=[
                 
                 )],style={'margin-top':'3em'}),
                 ],className=['container-fluid'],style={'margin-bottom':'4em', 'margin-top':0}),
-                html.Div([dcc.Checklist(
-                            id='inflation_ajust',
-                            options=[{'label': i ,'value':i} for i in ['Adjust for Inflation']],
-                            values=[],
-                )],className=['col-sm-4'] ),
-                html.Div([dcc.Checklist(
-                            id='include_benefits',
-                            options=[{'label': i ,'value':i} for i in ['Include Benefits']],
-                            values=[],
-                            
-                )],className=['col-sm-4'] ),
-                html.Div([dcc.Checklist(
-                            id='include_salary',
-                            options=[{'label': i ,'value':i} for i in ['Include Base Salary']],
-                            values=['Include Base Salary'],
-                            
-                )],className=['col-sm-4'] ),
+                
         ],className='col-sm-5'),
         html.Div([
           html.Div([
                   html.Div([
-                      html.H5(children='Industry (leave blank for all):'),
+                      html.H5(children='Sector (leave blank for all):'),
                       dcc.Dropdown(
                                   id='sector_select',
                                   options=[{'label': i, 'value': i} for i in db_app.SECTORS],
                                   value = None
                   )]),
                   html.Div([
-                      html.H5(children='Company (leave blank for all):'),
+                      html.H5(children='Employer (leave blank for all):'),
                       dcc.Dropdown(
                                   id='companies_select'
                   )]),
-                  html.Div([
-                    html.H5(children='Job Category (leave blank for all):'),
-                    dcc.Dropdown(
-                        id='position_select',
-                        options=[{'label': ii, 'value': i} for i, ii in zip(db_app.POSITIONS, db_app.POSITION_LABLES)],
-                        value='',
-                        clearable=True,
 
-                   )]),
              ],className='container-fluid'),
         ],className='col-sm-3'),
-
         html.Div([
-                html.Div ([
-                    dcc.Graph(id='stacked_area',className=''),
-                    ],style={'margin':0}),
-        ],className='col-sm-4'),
-    ],className='container-fluid well'), 
+            html.Div([
+                html.H5(children='Role (leave blank for all):'),
+                dcc.Dropdown(
+                    id='position_select',
+                    options=[{'label': ii, 'value': i} for i, ii in zip(db_app.POSITIONS, db_app.POSITION_LABLES)],
+                    value='',
+                    clearable=True,),
+                html.H5(""),
+                html.Div([dcc.Checklist(
+                            id='inflation_ajust',
+                            options=[{'label': i ,'value':i} for i in ['Adjust for Inflation']],
+                            values=[],
+                )],className="" ),
+                html.Div([dcc.Checklist(
+                            id='include_benefits',
+                            options=[{'label': i ,'value':i} for i in ['Benefits']],
+                            values=[],
+                            
+                )],className="" ),
+                html.Div([dcc.Checklist(
+                            id='include_salary',
+                            options=[{'label': i ,'value':i} for i in ['Salary']],
+                            values=['Salary'],
+                )],className="" ),
+
+                ]),
+        ],className='col-sm-3'),
+    ],className='container-fluid well'),
+
+
     html.Div([
         html.Div ([
            dcc.Graph(id='graph_counts',className=''),
-        ],className=['col-sm-6']),
+        ],className='container-fluid'),
 
         html.Div ([
             dcc.Graph(id='graph_salaries',className=''),
-        ],className=['col-sm-6']),
-    ],className='container-fluid'),
+        ],className='container-fluid'),
+    ],className='col-sm-6 container-fluid'),
+
     html.Div([
         html.Div([
-            html.Div([
-                 html.Div(id='results_box',className='summary') 
-            ],className=['container-fluid']),
-        ],className='col-sm-4'),
-        html.Div([
-            html.Div(id='sector_avg_box', className='summary'),
-        ],className='col-sm-8'),
-    ],className='container-fluid'),
+            html.Div ([
+                dcc.Graph(id='stacked_area',className=''),
+                ],className='col-sm-6 container-fluid', style={'margin':0}),
+            html.Div ([
+                dcc.Graph(id='stacked_area1',className=''),
+                ],className='col-sm-6 container-fluid', style={'margin':0}),
+        ],className='container-fluid'),
+        html.Div(id='sector_avg_box', className='summary'),
+    ],className='col-sm-6 container-fluid'),
+
     html.Div(id='intermediate-value',style={'display': 'None'}),
 ])
 
@@ -130,6 +133,30 @@ def call1(value):
     for i in ret1:
         options.append({'label': i, 'value': i})
     return options
+
+@app.callback(
+    Output(component_id='companies_select', component_property='value'),
+    [Input(component_id='sector_select', component_property='value')])
+def call2(value):
+    return None
+
+
+###############################################################################
+# List of roles for this sector 
+###############################################################################
+@app.callback(
+    Output(component_id='position_select', component_property= 'options'),
+    [Input(component_id='sector_select', component_property='value')])
+def call1(value):
+    return fun.get_roles(value, db_app.df)
+
+@app.callback(
+    Output(component_id='position_select', component_property= 'value'),
+    [Input(component_id='sector_select', component_property='value'),
+    Input(component_id='companies_select', component_property='value')])
+def call11(value, valu):
+    return None
+
 
 #################################################################################
 # DATA PREPARATION
@@ -158,7 +185,6 @@ def clean_data(sector,years, company, position, inflation, benefits, salary, sal
         
     if (sector != None):
         df_temp = df_temp[df_temp._sector == sector]
-        # raise ValueError(df_temp.shape, 23)
     else:
         sector = "All Industries"
 
@@ -172,6 +198,7 @@ def clean_data(sector,years, company, position, inflation, benefits, salary, sal
     else:
 
         earn_column = fun.get_earnings_column(inflation, salary, benefits)
+
         if earn_column=="":
             return ""
 
@@ -229,7 +256,7 @@ def displaySectorSummary(inflation, benefits, salary, salaries):
         df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
 
     if df_temp.shape[0]==0:
-            return ""
+        return ""
 
     df_temp = pd.DataFrame(df_temp.groupby(['_gender_x','_sector']).agg({'first_name':len, earn_column:np.mean}))
     df_temp.reset_index(inplace=True)
@@ -242,59 +269,16 @@ def displaySectorSummary(inflation, benefits, salary, salaries):
     dd['per_female'] = fun.get_f_count_number(dd.f_count, dd.m_count)
 
     dd['per_female_salary'] = fun.get_f_count_number(dd.f_salary, dd.m_salary)
-
-    dd = dd.reindex(columns=['_sector','m_count','f_count','per_female','m_salary','f_salary','per_female_salary'])
     dd.fillna(0, inplace=True)
-    dd.columns = ['Industry','# of Male','# of Female', '% of Female','Male Earnings','Female Earnings','% of Female Earnings']
 
-    return fun.generate_table(dd, title='Averages by Industry for '+ str(db_app.CURRENT_YEAR),  dtypes = ["","num","num","per","dol","dol","per"])
+    dd['difference'] = dd.apply(lambda x: x.f_salary - x.m_salary, axis = 1)
 
+    dd = dd.reindex(columns=['_sector','m_count','f_count','per_female','m_salary','f_salary', 'difference'])
+    
+    dd.columns = ['Sector','Total (men)','Total (women)', 'Percent (women)','Average salary (men)','Average salary (women)', 'Difference']
 
-#################################################################################
-# RESULTS BOX is a small summary of the graphs, populated from the same data dump
-#################################################################################
-@app.callback(
-    Output(component_id='results_box', component_property='children'),
-    [Input('intermediate-value', 'children')])
-def displayGraphSummary(value):
-    if value == "":
-            return html.Div(children = 'No Results Returned',className= ['alert alert-info'])
+    return fun.generate_table(dd, title='Averages by Sector for '+ str(db_app.CURRENT_YEAR),  dtypes = ["","num","num","per","dol","dol","dol",],col_to_highlight_negatives=6)
 
-    datasets = json.loads(value)
-
-    df_m= pd.read_json(datasets['df_m'], orient='split')
-    df_f= pd.read_json(datasets['df_f'], orient='split')
-
-    f_count = df_f.first_name.sum()
-    m_count = df_m.first_name.sum()
-
-    f_salary = 0
-    if f_count>0:
-        f_salary = round(df_f.salary_x.mean(),2)
-
-    m_salary = 0
-    if m_count>0:
-        m_salary = round(df_m.salary_x.mean(),2)
-
-    per_female = 0
-    if (f_count>0):
-        per_female = round(f_count/(f_count+m_count)*100,2)
-    per_female_salary  = 0
-    if f_count > 0:
-        per_female_salary = round(f_salary/(f_salary+m_salary)*100,2)
-
-    temp = []
-    temp.append(["Male Employees Count", "{:,}".format(m_count)])
-    temp.append(["Male Average Earnings", "$"+"{:,}".format(m_salary)])
-    temp.append(["",""])
-    temp.append(["# of Female Employees", "{:,}".format(f_count)])
-    temp.append(["Female Average Earnings", "$"+"{:,}".format(f_salary)])
-    temp.append(["",""])
-    temp.append(["# of Females", str(per_female) + "%"])
-    temp.append(["Female Salaries", str(per_female_salary) + "%"])
-
-    temp_df = pd.DataFrame(temp)
-    return fun.generate_table(temp_df, title = "Graphs Summary", display_columns=False)
 
 
 ###############################################################################
@@ -303,15 +287,94 @@ def displayGraphSummary(value):
 
 
 ###############################################################################
-# Small area graph at the top of the page, kind of summary view of data
+# Small area graph at the top of the page, kind of summary view for sector 
 ###############################################################################
 @app.callback(
     Output(component_id='stacked_area', component_property='figure'),
+    [Input(component_id='sector_select', component_property='value'),
+    Input(component_id='year_slider', component_property='value'), 
+    Input(component_id='position_select', component_property='value'),
+    Input(component_id='inflation_ajust', component_property='values'),
+    Input(component_id='include_benefits', component_property='values'),
+    Input(component_id='include_salary', component_property='values'),
+    Input(component_id='salary_slider', component_property='value')])
+def populate_sack_1(sector,years, position, inflation, benefits, salary, salaries):
+
+    df_temp = db_app.df.copy()
+
+    if position!='' and position!= None:
+        if position=='chief':
+            df_temp=df_temp[df_temp.job_category2=='chief']
+        else :
+            df_temp=df_temp[df_temp.job_category1==position]
+        
+    if (sector != None):
+        df_temp = df_temp[df_temp._sector == sector]
+        # raise ValueError(df_temp.shape, 23)
+    else:
+        sector = "All Industries"
+
+    if df_temp.shape[0]==0:
+        return fun.get_default_graph()
+    else:
+
+        earn_column = fun.get_earnings_column(inflation, salary, benefits)
+
+        if earn_column=="":
+            return fun.get_default_graph()
+
+        df_temp =  df_temp[df_temp.c_year >= int(years[0])]
+        df_temp =  df_temp[df_temp.c_year <= int(years[1])]
+
+        if df_temp.shape[0]==0 :
+            return fun.get_default_graph()
+
+        df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
+        if (salaries[1]<600000):
+            df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
+
+        if df_temp.shape[0]==0:
+                return fun.get_default_graph()
+
+        df_temp = pd.DataFrame(df_temp.groupby(['c_year','_gender_x']).agg({'first_name':len}))
+        df_temp.reset_index(inplace=True)
+
+        df_temp.columns=['c_year','_gender_x','first_name']
+
+        df_m= df_temp[df_temp._gender_x.astype(str)=='male']
+        df_f= df_temp[df_temp._gender_x.astype(str)=='female']
+
+        return  {
+                'data': [
+                    {'x': df_m.c_year, 'y': df_m.first_name,  'name': 'Men','stackgroup':'one','fillcolor':db_app.COLORS['cmale']},
+                    {'x': df_f.c_year, 'y': df_f.first_name,  'name': 'Women','stackgroup':'one','fillcolor':db_app.COLORS['cfemale']},
+                ],
+                'layout' : {
+                    'title':'Sector totals',   
+                    'margin':{'t':30,'r':20,'l':50,'b':50},
+                    'height': 340,
+                    'showlegend':True,
+                    'legend':{'orientation':"h"},
+                        'xaxis':dict(
+                                type='category',
+                            ),
+                        'yaxis':dict(
+                                title = 'Men vs Women',
+                                type='linear', showticklabels=False,gridcolor='black', gridwidth=0.2, hoverformat = ',2f'
+                            )
+                        }
+                }
+
+###############################################################################
+# Small area graph at the top of the page, kind of summary view for company 
+###############################################################################
+@app.callback(
+    Output(component_id='stacked_area1', component_property='figure'),
     [Input('intermediate-value', 'children')])
-def call3_stacked_area(value):
-    
+def populate_sack_2(value):
+
     if value == "":
-        return {}
+        return fun.get_default_graph()
 
     datasets = json.loads(value)
 
@@ -320,21 +383,21 @@ def call3_stacked_area(value):
 
     return  {
             'data': [
-                {'x': df_m.c_year, 'y': df_m.first_name,  'name': 'Male','stackgroup':'one','fillcolor':db_app.COLORS['cmale']},
-                {'x': df_f.c_year, 'y': df_f.first_name,  'name': 'Female','stackgroup':'one','fillcolor':db_app.COLORS['cfemale']},
+                {'x': df_m.c_year, 'y': df_m.first_name,  'name': 'Men','stackgroup':'one','fillcolor':db_app.COLORS['cmale']},
+                {'x': df_f.c_year, 'y': df_f.first_name,  'name': 'Women','stackgroup':'one','fillcolor':db_app.COLORS['cfemale']},
             ],
             'layout' : {
-                'title':'Employees Counts',   
+                'title':'Employer Totals',   
                 'margin':{'t':30,'r':20,'l':50,'b':50},
-                'height': 260,
+                'height': 340,
                 'showlegend':True,
                 'legend':{'orientation':"h"},
                     'xaxis':dict(
                             type='category',
                         ),
                     'yaxis':dict(
-                            title = 'Male vs Female',
-                            type='linear', showticklabels=False,gridcolor='black', gridwidth=0.2
+                            title = 'Men vs Women',
+                            type='linear', showticklabels=False,gridcolor='black', gridwidth=0.2, hoverformat = ',2f'
                         )
                     }
             }
@@ -348,7 +411,7 @@ def call3_stacked_area(value):
     [Input('intermediate-value', 'children')])
 def call3(value):
     if value == "":
-        return {}
+        return fun.get_default_graph()
 
     datasets = json.loads(value)
 
@@ -357,17 +420,17 @@ def call3(value):
 
     return {
             'data': [
-                {'x': df_m.c_year, 'y': df_m.first_name, 'type': 'bar', 'name': 'Male','textposition':'inside',
-                'insidetextfont':{'size':20}, 'textfont':{'size':20},
+                {'x': df_m.c_year, 'y': df_m.first_name, 'type': 'bar', 'name': 'Men','textposition':'inside',
+                'insidetextfont':{'size':'120%'},
                 'text': fun.get_m_count(df_f.first_name, df_m.first_name), 
                 'marker':{'color':db_app.COLORS['cmale']}},
-                {'x': df_f.c_year, 'y': df_f.first_name, 'type': 'bar', 'name': 'Female','textposition':'inside', 
-                'insidetextfont':{'size':20},
+                {'x': df_f.c_year, 'y': df_f.first_name, 'type': 'bar', 'name': 'Women','textposition':'inside', 
+                'insidetextfont':{'size':'120%'},
                 'text': fun.get_f_count(df_f.first_name, df_m.first_name), 
                 'marker':{'color':db_app.COLORS['cfemale']}},
             ],
             'layout': {
-                'title':'Employees Counts',
+                'title':'Total Employees on Sunshine List',
                 'plot_bgcolor': db_app.COLORS['background'],
                 'paper_bgcolor': db_app.COLORS['background'],
                 'font': {
@@ -375,7 +438,7 @@ def call3(value):
                     'size':'120%'},
                 'xaxis':dict(tickvals = db_app.YEARS, 
                     ticktext = db_app.YEARS),
-                'yaxis':dict(title = 'Employee Count',gridcolor='white', gridwidth=0.5)
+                'yaxis':dict(title = '',gridcolor='white', gridwidth=0.5, hoverformat = ',2f', tickformat = ',2f')
             }
         }
 
@@ -388,22 +451,25 @@ def call3(value):
     [Input('intermediate-value', 'children')])
 def call4(value):
     if value == "":
-        return {}
+        return fun.get_default_graph()
 
     datasets = json.loads(value)
 
     df_m= pd.read_json(datasets['df_m'], orient='split')
     df_f= pd.read_json(datasets['df_f'], orient='split')
+
+    y_min = fun.get_min_plus_5(df_m.salary_x, df_f.salary_x)
+    y_max = max([df_m.salary_x.max(),df_f.salary_x.max()])
     return {
             'data': [
-                {'x': df_m.c_year, 'y': df_m.salary_x, 'type': 'bar', 'name': 'Male',
+                {'x': df_m.c_year, 'y': df_m.salary_x.astype(int), 'type': 'bar', 'name': 'Men',
                 'marker':{'color':db_app.COLORS['cmale']}},
-                {'x': df_f.c_year, 'y': df_f.salary_x, 'type': 'bar', 'name': 'Female',
+                {'x': df_f.c_year, 'y': df_f.salary_x.astype(int), 'type': 'bar', 'name': 'Women',
                 'marker':{'color':db_app.COLORS['cfemale']}},
             ],
             'layout':
             {
-                'title':'Average Earnings Comparison',
+                'title':'Average Salaries',
                 'plot_bgcolor': db_app.COLORS['background'],
                 'paper_bgcolor': db_app.COLORS['background'],
                 
@@ -412,7 +478,8 @@ def call4(value):
                     'size':'120%'},
                 'xaxis':dict(tickvals = db_app.YEARS, 
                     ticktext = db_app.YEARS),
-                'yaxis':dict(title = 'Canadian $', gridcolor='white', gridwidth=0.5),
+                'yaxis':dict(title = '', gridcolor='white', gridwidth=0.5, hoverformat = '$,2f', range=[y_min, y_max], tickformat = '$,2f')
+            # range: [-0.5, 23.5]),
 
             }
         }

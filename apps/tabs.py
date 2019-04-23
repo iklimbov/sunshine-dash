@@ -10,13 +10,13 @@ from apps import db_app1, db_app2, db_app3, db_app4
 layout = html.Div([
     html.H1('Sunshine List Ontario'),
     dcc.Tabs(id="tabs-sunshine", value='tab-1', children=[
-        dcc.Tab(label='2008 - 2018 View', value='tab-1', className='custom-tab nav nav-tabs nav-justified ',
+        dcc.Tab(label='Ten-Year Outlook', value='tab-1', className='custom-tab nav nav-tabs nav-justified report_tab',
                 selected_className='custom-tab-active nav nav-pills active '),
-        dcc.Tab(label='2018 Earnings Distribution View', value='tab-2', className='nav nav-tabs nav-justified custom-tab',
+        dcc.Tab(label='2018 Employer Comparison', value='tab-2', className='nav nav-tabs nav-justified custom-tab',
                 selected_className='nav nav-pills active custom-tab-active'),
-        dcc.Tab(label='2018 Summary View', value='tab-3', className='nav nav-tabs nav-justified custom-tab',
-                selected_className='nav nav-pills active custom-tab-active'),
-        dcc.Tab(label='2018 Company View', value='tab-4', className='nav nav-tabs nav-justified custom-tab',
+        # dcc.Tab(label='2018 Summary View', value='tab-3', className='nav nav-tabs nav-justified custom-tab',
+        #         selected_className='nav nav-pills active custom-tab-active'),
+        dcc.Tab(label='2018 Employer Ranking', value='tab-4', className='nav nav-tabs nav-justified custom-tab',
                 selected_className='nav nav-pills active custom-tab-active'),
     ]),
     html.Div([
@@ -36,8 +36,8 @@ def render_content(tab):
         return db_app1.layout
     elif tab == 'tab-2':
         return db_app2.layout
-    elif tab == 'tab-3':
-        return db_app3.layout
+    # elif tab == 'tab-3':
+    #     return db_app3.layout
     elif tab == 'tab-4':
         return db_app4.layout
 

@@ -34,14 +34,14 @@ layout = html.Div(children=[
                 )],className=['col-sm-4'] ),
                 html.Div([dcc.Checklist(
                             id='include_benefits3',
-                            options=[{'label': i ,'value':i} for i in ['Include Benefits']],
+                            options=[{'label': i ,'value':i} for i in ['Benefits']],
                             values=[],
                             
                 )],className=['col-sm-4'] ),
                 html.Div([dcc.Checklist(
                             id='include_salary3',
-                            options=[{'label': i ,'value':i} for i in ['Include Base Salary']],
-                            values=['Include Base Salary'],
+                            options=[{'label': i ,'value':i} for i in ['Salary']],
+                            values=['Salary'],
                             
                 )],className=['col-sm-4'] ),
         ],className='col-sm-6'),
@@ -59,7 +59,7 @@ layout = html.Div(children=[
             html.H3(children='Industries'),  
             html.Div([
                 html.H5(
-                    children='Job Category (leave blank for all):'),
+                    children='Role (leave blank for all):'),
                 dcc.Dropdown(
                     id='position_select3',
                     options=[{'label': ii, 'value': i} for i, ii in zip(db_app.POSITIONS, db_app.POSITION_LABLES)],
@@ -85,13 +85,13 @@ layout = html.Div(children=[
             html.H3(children='Job Categories'),
                 html.Div([
                       html.Div([
-                          html.H5(children='Industry (leave blank for all):'),
+                          html.H5(children='Sector (leave blank for all):'),
                           dcc.Dropdown(
                                       id='sector_select3',
                                       options=[{'label': i, 'value': i} for i in db_app.SECTORS]
                       )]),
                       html.Div([
-                          html.H5(children='Company (leave blank for all):'),
+                          html.H5(children='Employer (leave blank for all):'),
                           dcc.Dropdown(
                                       id='companies_select3'
                       )]),
@@ -129,7 +129,7 @@ layout = html.Div(children=[
     Input(component_id='include_benefits3', component_property='values'),
     Input(component_id='include_salary3', component_property='values'),
     Input(component_id='salary_slider3', component_property='value')])
-def displaySummaryByIndustry(position, inflation,benefits,salary,salaries):
+def displaySummaryBySector(position, inflation,benefits,salary,salaries):
 
     df_temp = db_app.df18.copy()
     
@@ -180,18 +180,18 @@ def displaySummaryByIndustry(position, inflation,benefits,salary,salaries):
             per_female_salary = round(f_salary/(f_salary+m_salary)*100,2)
 
         temp = []
-        temp.append(["Male Employees Count", "{:,}".format(m_count)])
-        temp.append(["Male Average Earnings", "$"+"{:,}".format(m_salary)])
+        temp.append(["Men Employees Count", "{:,}".format(m_count)])
+        temp.append(["Men Average Earnings", "$"+"{:,}".format(m_salary)])
         temp.append(["",""])
-        temp.append(["# of Female Employees", "{:,}".format(f_count)])
-        temp.append(["Female Average Earnings", "$"+"{:,}".format(f_salary)])
+        temp.append(["# of Women Employees", "{:,}".format(f_count)])
+        temp.append(["Women Average Earnings", "$"+"{:,}".format(f_salary)])
         temp.append(["",""])
         temp.append(["# of Females", str(per_female) + "%"])
-        temp.append(["Female Salaries", str(per_female_salary) + "%"])
+        temp.append(["Women Salaries", str(per_female_salary) + "%"])
 
         temp_df = pd.DataFrame(temp)
 
-        return fun.generate_table(temp_df, title = "Industry Summary", display_columns=False)
+        return fun.generate_table(temp_df, title = "Sector Summary", display_columns=False)
 
 
 ###############################################################################
@@ -268,14 +268,14 @@ def displaySummaryByCategory(sector,company, inflation,benefits,salary,salaries)
             per_female_salary = round(f_salary/(f_salary+m_salary)*100,2)
 
         temp = []
-        temp.append(["Male Employees Count", "{:,}".format(m_count)])
-        temp.append(["Male Average Earnings", "$"+"{:,}".format(m_salary)])
+        temp.append(["Men Employees Count", "{:,}".format(m_count)])
+        temp.append(["Men Average Earnings", "$"+"{:,}".format(m_salary)])
         temp.append(["",""])
-        temp.append(["# of Female Employees", "{:,}".format(f_count)])
-        temp.append(["Female Average Earnings", "$"+"{:,}".format(f_salary)])
+        temp.append(["# of Women Employees", "{:,}".format(f_count)])
+        temp.append(["Women Average Earnings", "$"+"{:,}".format(f_salary)])
         temp.append(["",""])
         temp.append(["# of Females", str(per_female) + "%"])
-        temp.append(["Female Salaries", str(per_female_salary) + "%"])
+        temp.append(["Women Salaries", str(per_female_salary) + "%"])
 
         temp_df = pd.DataFrame(temp)
 
@@ -317,8 +317,8 @@ def cbg4_3( inflation, benefits, salary, salaries):
     ret =  {
             'data': [
                 {'values': [ int(df_m.shape[0]), int(df_f.shape[0])], 'type': 'pie', 'hoverinfo':'skip',
-                'labels': ['Male','Female'],'textfont':{'size':'120%'},
-                'text':['Male: '+ "{:,}".format(df_m.shape[0]),'Female: ' + "{:,}".format(df_f.shape[0])],
+                'labels': ['Men','Women'],'textfont':{'size':'120%'},
+                'text':['Men: '+ "{:,}".format(df_m.shape[0]),'Women: ' + "{:,}".format(df_f.shape[0])],
                 'marker':{'colors':[db_app.COLORS['cmale'],db_app.COLORS['cfemale']]}},
             ],
             'layout': {
@@ -436,7 +436,7 @@ def cbg1_3( position, inflation, benefits, salary, salaries):
 
         df_m= df_temp[df_temp._gender_x.astype(str)=='male']
         df_f= df_temp[df_temp._gender_x.astype(str)=='female']
-    return fun.format_h_stack_graph_data(df_f,df_m, '_sector', 'first_name','Earnings by Industry', 450 )
+    return fun.format_h_stack_graph_data(df_f,df_m, '_sector', 'first_name','Earnings by Sector', 450 )
 
 
 ###############################################################################
@@ -483,7 +483,7 @@ def cbg2_3(position, inflation, benefits, salary, salaries):
         df_m= df_temp[df_temp._gender_x.astype(str)=='male']
         df_f= df_temp[df_temp._gender_x.astype(str)=='female']
 
-    return fun.format_h_stack_graph_data(df_f,df_m, '_sector', 'salary_x','Earnings by Industry', 450 )
+    return fun.format_h_stack_graph_data(df_f,df_m, '_sector', 'salary_x','Earnings by Sector', 450 )
 
 
 ###############################################################################
@@ -540,7 +540,7 @@ def cbg1_3( sector, company, inflation, benefits, salary, salaries):
 
         df_m= df_temp[df_temp._gender_x.astype(str)=='male']
         df_f= df_temp[df_temp._gender_x.astype(str)=='female']
-    return fun.format_h_stack_graph_data(df_f,df_m, 'job_category1','first_name', '# of Employees by Job Category', 650)
+    return fun.format_h_stack_graph_data(df_f,df_m, 'job_category1','first_name', '# of Employees by Role', 650)
 
 
 ###############################################################################
@@ -597,7 +597,7 @@ def cbg1_3( sector, company, inflation, benefits, salary, salaries):
 
         df_m= df_temp[df_temp._gender_x.astype(str)=='male']
         df_f= df_temp[df_temp._gender_x.astype(str)=='female']
-    return fun.format_h_stack_graph_data(df_f,df_m, 'job_category1', 'salary_x', 'Earnings by Job Category', 650)    
+    return fun.format_h_stack_graph_data(df_f,df_m, 'job_category1', 'salary_x', 'Earnings by Role', 650)    
 
 
 ###############################################################################
@@ -615,6 +615,25 @@ def call1_3(value):
     for i in ret1:
         options.append({'label': i, 'value': i})
     return options
+@app.callback(
+    Output(component_id='companies_select3', component_property='value'),
+    [Input(component_id='sector_select3', component_property='value')])
+def call23(value):
+    return None      
 
 
-#        
+###############################################################################
+# List of roles for this sector 
+###############################################################################
+@app.callback(
+    Output(component_id='position_select3', component_property= 'options'),
+    [Input(component_id='sector_select3', component_property='value')])
+def call1(value):
+    return fun.get_roles(value, db_app.df)
+
+@app.callback(
+    Output(component_id='position_select3', component_property= 'value'),
+    [Input(component_id='sector_select3', component_property='value'),
+    Input(component_id='companies_select3', component_property='value')])
+def call11(value, value1):
+    return None

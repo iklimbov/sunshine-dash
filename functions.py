@@ -1,6 +1,7 @@
 import dash_html_components as html
 
 import db_app
+from db_app import app
 
 
 ###############################################################################
@@ -13,9 +14,11 @@ import db_app
 # one row can be highlighted,
 # if data types are passed, values are formatted 
 ##############################################################################
-def generate_table(dataframe, max_rows=20, title = "", display_columns = True, dtypes = [], highlight_row = -1):
+def generate_table(dataframe, max_rows=20, title = "", display_columns = True, dtypes = [], highlight_row = -1, col_to_highlight_negatives=-1):
 
     def format_me(use_dtypes, s,f):
+        if s!=s:
+            return ""
         if use_dtypes == False:
             return s
         if f == "":
@@ -28,6 +31,18 @@ def generate_table(dataframe, max_rows=20, title = "", display_columns = True, d
             return "$" + "{:,}".format(int(s))
         else:
             return "Format ERROR: "+f
+
+    def get_red(val,ctr):
+        if ctr != col_to_highlight_negatives:
+            return "none"
+        try:
+            x = float(val)
+            if x < 0:
+                return "red_field"
+            else:
+                return "green_field"
+        except:
+            return "none"
 
     if (len(title)>0):
         title = html.H4(children = title)
@@ -45,14 +60,17 @@ def generate_table(dataframe, max_rows=20, title = "", display_columns = True, d
     highlight = 'highlight_row'
     classes = ["none" if int(i) != int(highlight_row) else highlight for i in range(0, len(dataframe))]
 
+    red = 'red_field'
+    classes_td = [([get_red(dataframe.iloc[i][col],cyr) for col,cyr in zip(dataframe.columns, range(0,len(dataframe.columns)))]) for i in range(min(len(dataframe), max_rows))]
+
     body = (
         cols +
         # Body
         [html.Tr([
-            html.Td(format_me(use_dtypes,dataframe.iloc[i][col],ii)) for col, ii in zip(dataframe.columns,dtypes)
+            html.Td(format_me(use_dtypes,dataframe.iloc[i][col],ii),className = row_class) for col, ii, row_class in zip(dataframe.columns,dtypes, row_classes)
         ],
             className = iii
-        ) for i, iii in zip (range(min(len(dataframe), max_rows)),classes )])
+        ) for i, iii, row_classes in zip (range(min(len(dataframe), max_rows)),classes, classes_td )])
 
     table =  html.Table(
         body
@@ -97,6 +115,102 @@ def get_earnings_column(inflation, salary, benefits):
                 return 'salary_adjusted_total'
             else:
                 return 'salary_total'
+
+
+##############################################################################
+# Returns empty graph (black space with nothing on it)
+##############################################################################
+def get_default_graph(height = 200, title = '', bg_color = 'white'):
+    return {
+            'data': [
+            ],
+            'layout': {
+                'title': title,
+                'plot_bgcolor': bg_color,
+                'paper_bgcolor': bg_color,
+                'font': {
+                    'color': db_app.COLORS['text'],
+                    'size':'120%'},
+                'margin':{'t':'1em','r':40,'l':(37*7),'b':50},
+                # 'height': height,
+                'showlegend':False,
+
+                'yaxis':dict(showticklabels=False, showgrid=False, zeroline=False, showline=False),
+                'xaxis':dict(showticklabels=False, showgrid=False, zeroline=False, showline=False),
+            }
+        }
+
+
+##############################################################################
+# Distribution graph
+##############################################################################
+def format_dist_graph_data(df_f,df_m, title ):
+
+    gr_layout = {
+            'plot_bgcolor': db_app.COLORS['background'],
+            'paper_bgcolor': db_app.COLORS['background'],
+            'font': {
+                'color': db_app.COLORS['text'],
+                'size': '120%'},
+            'visible':'legendonly',
+            'title': title,
+            'margin':{'t':'1em','r':1,'l':50,'b':40},
+            'height': 650,
+            'legend':{'orientation':"h"},
+            'yaxis':dict(title = '',gridcolor='white', gridwidth=0.3, hoverformat = ',2f', tickformat = ',2f'),
+            'xaxis':dict(title = '',hoverformat = '$,2f', tickformat = '$,2f'),
+    }
+    data =  [
+            {
+                'x': df_m.salary_x.astype(int),
+                'name': 'Men',
+                'type': 'histogram',
+                'nbinsx': 20,
+                # 'opacity':0.6,
+                'margin': '0.5em',
+                'marker':{'color':db_app.COLORS['cmale']}
+            },
+            {
+                'x': df_f.salary_x.astype(int),
+                'name': 'Women',
+                'type': 'histogram',
+                'nbinsx': 20,
+                # 'opacity':0.6,
+                'margin': '0.5em',
+                'marker':{'color':db_app.COLORS['cfemale']}
+            },
+        ]
+    temp = {
+        'data': data, 
+        'layout': gr_layout
+    }
+    return temp
+
+##############################################################################
+# Horizontal stack graph
+##############################################################################
+def format_h_stack_graph_data(df_f,df_m, ycolumn,xcolumn, title, height=400):
+    return {
+            'data': [
+                {'y': df_m[ycolumn], 'x': df_m[xcolumn], 'type': 'bar', 'name': 'Men','textfont':{'size':20}, 'orientation':'h',
+                'marker':{'color':db_app.COLORS['cfemale']}},
+                {'y': df_f[ycolumn], 'x': df_f[xcolumn], 'type': 'bar', 'name': 'Women','textfont':{'size':20}, 'orientation':'h',
+                'marker':{'color':db_app.COLORS['cmale']}},
+            ],
+            'layout': {
+                'barmode':'stack',
+                'title': title,
+                'plot_bgcolor': db_app.COLORS['background'],
+                'paper_bgcolor': db_app.COLORS['background'],
+                'font': {
+                    'color': db_app.COLORS['text'],
+                    'size':'120%'},
+                'margin':{'t':'1em','r':40,'l':(37*7),'b':50},
+                'height': height,
+                'legend':{'orientation':"h"},
+                'xaxis':dict(showticklabels=False,gridcolor='white', gridwidth=0.5)
+            }
+        }
 
 ##############################################################################
 # returns % of the first value 
@@ -159,72 +273,56 @@ def get_m_count(f, m):
             ret.append(0)
     return ret
 
-##############################################################################
-# Distribution graph
-##############################################################################
-def format_dist_graph_data(df_f,df_m, title ):
-
-    gr_layout = {
-            'plot_bgcolor': db_app.COLORS['background'],
-            'paper_bgcolor': db_app.COLORS['background'],
-            'font': {
-                'color': db_app.COLORS['text'],
-                'size': '120%'},
-            'visible':'legendonly',
-            'title': title,
-            'margin':{'t':'1em','r':1,'l':50,'b':50},
-            'height': 700,
-            'legend':{'orientation':"h"},
-            'yaxis':dict(title = 'Employee Count per Salary Category',gridcolor='white', gridwidth=0.3),
-    }
-    data =  [
-            {
-                'x': df_m.salary_x.astype(int),
-                'name': 'Male',
-                'type': 'histogram',
-                'nbinsx': 20,
-                # 'opacity':0.6,
-                'margin': '1em',
-                'marker':{'color':db_app.COLORS['cmale']}
-            },
-            {
-                'x': df_f.salary_x.astype(int),
-                'name': 'Female',
-                'type': 'histogram',
-                'nbinsx': 20,
-                # 'opacity':0.6,
-                'margin': '1em',
-                'marker':{'color':db_app.COLORS['cfemale']}
-            },
-        ]
-    temp = {
-        'data': data, 
-        'layout': gr_layout
-    }
-    return temp
 
 ##############################################################################
-# Horizontal stack graph
+# Returns min of two lists + 5%
+# That is used to display bottom of bar graphs, so the smallest bar is visible
 ##############################################################################
-def format_h_stack_graph_data(df_f,df_m, ycolumn,xcolumn, title, height=400):
-    return {
-            'data': [
-                {'y': df_m[ycolumn], 'x': df_m[xcolumn], 'type': 'bar', 'name': 'Male','textfont':{'size':20}, 'orientation':'h',
-                'marker':{'color':db_app.COLORS['cfemale']}},
-                {'y': df_f[ycolumn], 'x': df_f[xcolumn], 'type': 'bar', 'name': 'Female','textfont':{'size':20}, 'orientation':'h',
-                'marker':{'color':db_app.COLORS['cmale']}},
-            ],
-            'layout': {
-                'barmode':'stack',
-                'title': title,
-                'plot_bgcolor': db_app.COLORS['background'],
-                'paper_bgcolor': db_app.COLORS['background'],
-                'font': {
-                    'color': db_app.COLORS['text'],
-                    'size':'120%'},
-                'margin':{'t':'1em','r':40,'l':(37*7),'b':50},
-                'height': height,
-                'legend':{'orientation':"h"},
-                'xaxis':dict(showticklabels=False,gridcolor='white', gridwidth=0.5)
-            }
-        }
+def get_min_plus_5(f,m):
+    plus = 0
+    mm = 0
+    try:
+        mm = min(list([f.min(),m.min()]))
+        plus = round(mm*0.1)
+    except Exception as ex:
+        # app.logger.warning(ex)
+        pass
+    finally:
+        return mm-plus
+
+##############################################################################
+# Returns a list of Roles for the given sector 
+##############################################################################
+def get_roles(sector,df):
+    temp = df
+    if sector!= 'None' and sector!= None:
+        temp = temp[temp._sector==sector]
+
+    ret1 = temp.job_category1.unique()
+    ret1 = list(ret1)
+    ret1.sort()
+    options = []
+    options.append({'label': 'Other' , 'value': 'other'})
+    options.append({'label': 'C-Suite' , 'value': 'chief'})
+    for i in ret1:
+        if i != 'other':
+            options.append({'label': i.capitalize() , 'value': i})
+
+    return options
+
+
+##############################################################################
+# Checks to see if the value is in the options of the check box 
+# array of dictionaries
+##############################################################################
+def in_options(options,value):
+
+    if options is None:
+        return False
+
+    for i in options:
+        k = i['label']
+        if k == value:
+            return True
+
+    return False
