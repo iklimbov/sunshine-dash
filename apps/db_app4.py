@@ -53,18 +53,16 @@ layout = html.Div(children=[
                       dcc.Dropdown(
                                   id='sector_select4',
                                   options=[{'label': i, 'value': i} for i in db_app.SECTORS],
-                                  value='Universities'
+                                  # value='Universities'
                   )]),
                   html.Div([
                       html.H5(children='Employer:'),
                       dcc.Dropdown(
                                   id='companies_select4', 
-                                  value= 'Ryerson University'
+                                  # value= 'Ryerson University'
                   )]),
-                  # html.Div ([
-                  #     html.Button('Generate Report', id='generate_button', className='btn'),
-                      
-                  # ]),
+                  html.H3([html.Div (id = 'info'),]),
+                  
             ],className='col-sm-3'),
         html.Div([
             html.Div([
@@ -129,83 +127,38 @@ layout = html.Div(children=[
 ])
 
 
-###############################################################################
-# Hide components on load, intill first report generated, to avoid empty graphs
-###############################################################################
-# @app.callback(Output('pies', 'style'), 
-#     [ Input(component_id='companies_select4', component_property='value'),
-#       Input(component_id='generate_button', component_property='n_clicks')],
-#     [ State(component_id='companies_select4', component_property='options'),])
-# def toggle_container(company, n, comp_options):
-#     if n == None:
-#         return {'display': 'none'}
-#     else:
-#         return {'display': 'block'}
-# @app.callback(Output('graphs', 'style'), 
-#     [ Input(component_id='companies_select4', component_property='value'),
-#       Input(component_id='generate_button', component_property='n_clicks')],
-#     [ State(component_id='companies_select4', component_property='options'),])
-# def toggle_container(company, n, comp_options):
-#     if n == None:
-#         return {'display': 'none'}
-#     else:
-#         return {'display': 'block'}
-# @app.callback(Output('summaries', 'style'), 
-#     [ Input(component_id='companies_select4', component_property='value'),
-#       Input(component_id='generate_button', component_property='n_clicks')],
-#     [ State(component_id='companies_select4', component_property='options'),])
-# def toggle_container(company, n, comp_options):
-#     if n == None:
-#         return {'display': 'none'}
-#     else:
-#         return {'display': 'block'}
-
-# @app.callback(Output('info', 'style'), 
-#     [ Input(component_id='companies_select4', component_property='value'),
-#       Input(component_id='generate_button', component_property='n_clicks'),
-#       Input(component_id='companies_select4', component_property='options'),
-#      Input(component_id='sector_select4', component_property='value')])
-# def toggle_container(company, n, comp_options, sector):
-#     if n == None:
-#         return {'display': 'block'}
-    
-#     if fun.in_options(comp_options, company) == False:
-#         return {'display': 'block'}
-
-#     if company == None or sector==None :
-#         return {'display': 'block'}
-    
-#     return {'display': 'none'}
-
 
 ###############################################################################
 # Update title of the report
 ###############################################################################
 @app.callback(
     Output(component_id='company_title', component_property='children'),
-    [ Input(component_id='companies_select4', component_property='value'),
-    Input(component_id='companies_select4', component_property='options'),])
-def update_company( company, comp_options):
-
-    if fun.in_options(comp_options, company) == False:
-        return ""
+    [ Input(component_id='companies_select4', component_property='value')])
+def function_4_1( company):
 
     if company == None or company== "":
         return ""
     else:
         return company + " Summary"
 
+###############################################################################
+# Update info box
+###############################################################################
+@app.callback(
+    Output(component_id='info', component_property='children'),
+    [Input(component_id='sector_select4', component_property='value'),
+    Input(component_id='companies_select4', component_property='value'),])
+def cbg2(sector, company):
+    if sector==None or company == None:
+        return html.Div(children = 'Select Sector and Company to begin',className= ['alert alert-info'])
 
 ###############################################################################
 # Update title of the report
 ###############################################################################
 @app.callback(
     Output(component_id='ratings_title', component_property='children'),
-    [ Input(component_id='companies_select4', component_property='value'),
-    Input(component_id='companies_select4', component_property='options'),])
-def update_company( company, comp_options):
-    if fun.in_options(comp_options, company) == False:
-        return ""
+    [ Input(component_id='companies_select4', component_property='value'),])
+def function_4_2( company):
     if company == None or company== "":
         return ""
     else:
@@ -220,12 +173,8 @@ def update_company( company, comp_options):
     Input(component_id='inflation_ajust4', component_property='values'),
     Input(component_id='include_benefits4', component_property='values'),
     Input(component_id='include_salary4', component_property='values'),
-    Input(component_id='salary_slider4', component_property='value'),
-    Input(component_id='companies_select4', component_property='options')])
-def cbg1_3( company, inflation, benefits, salary, salaries,comp_options):
-
-    if fun.in_options(comp_options, company) == False:
-        return fun.get_default_graph()
+    Input(component_id='salary_slider4', component_property='value')])
+def function_4_3( company, inflation, benefits, salary, salaries):
 
     if (company == "" or company==None ):
         return fun.get_default_graph()
@@ -301,14 +250,10 @@ def cbg1_3( company, inflation, benefits, salary, salaries,comp_options):
     Input(component_id='inflation_ajust4', component_property='values'),
     Input(component_id='include_benefits4', component_property='values'),
     Input(component_id='include_salary4', component_property='values'),
-    Input(component_id='salary_slider4', component_property='value'),
-    Input(component_id='companies_select4', component_property='options')])
-def company_summary1_generate(company, inflation, benefits, salary, salaries, comp_options):
+    Input(component_id='salary_slider4', component_property='value'),])
+def function_4_4(company, inflation, benefits, salary, salaries):
 
     if (company == "" or company==None ):
-        return fun.get_default_graph()
-
-    if fun.in_options(comp_options, company) == False:
         return fun.get_default_graph()
 
     df_temp=df[df.employer==company]
@@ -393,33 +338,30 @@ def company_summary1_generate(company, inflation, benefits, salary, salaries, co
     Input(component_id='inflation_ajust4', component_property='values'),
     Input(component_id='include_benefits4', component_property='values'),
     Input(component_id='include_salary4', component_property='values'),
-    Input(component_id='salary_slider4', component_property='value'),
-    Input(component_id='companies_select4', component_property='options')])
-def company_pie1_generate(company, inflation, benefits, salary, salaries, comp_options):
-    if (company == "" or company==None ):
-        return fun.get_default_graph(bg_color = "#f5f5f5")
+    Input(component_id='salary_slider4', component_property='value'),])
+def function_4_5(company, inflation, benefits, salary, salaries):
 
-    if fun.in_options(comp_options, company) == False:
-        return fun.get_default_graph(bg_color = "#f5f5f5")
+    if (company == "" or company==None ):
+        return fun.get_default_graph(bg_color = "#f5f5f5",height = 200)
 
     df_temp=df[df.employer==company]
 
     if df_temp.shape[0]==0:
-        return fun.get_default_graph(bg_color = "#f5f5f5")
+        return fun.get_default_graph(bg_color = "#f5f5f5",height = 200)
     else:
         earn_column = fun.get_earnings_column(inflation, salary, benefits)
         if earn_column=="":
-            return fun.get_default_graph(bg_color = "#f5f5f5")
+            return fun.get_default_graph(bg_color = "#f5f5f5",height = 200)
 
         if df_temp.shape[0]==0 :
-            return fun.get_default_graph(bg_color = "#f5f5f5")
+            return fun.get_default_graph(bg_color = "#f5f5f5",height = 200)
 
         df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
         if (salaries[1]<600000):
             df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
 
         if df_temp.shape[0]==0:
-                return fun.get_default_graph(bg_color = "#f5f5f5")
+            return fun.get_default_graph(bg_color = "#f5f5f5",height = 200)
 
         df_m= df_temp[df_temp._gender_x.astype(str)=='male']
         df_f= df_temp[df_temp._gender_x.astype(str)=='female']
@@ -454,34 +396,30 @@ def company_pie1_generate(company, inflation, benefits, salary, salaries, comp_o
     Input(component_id='inflation_ajust4', component_property='values'),
     Input(component_id='include_benefits4', component_property='values'),
     Input(component_id='include_salary4', component_property='values'),
-    Input(component_id='salary_slider4', component_property='value'),
-    Input(component_id='companies_select4', component_property='options')])
-def company_pie2_generate( company, inflation, benefits, salary, salaries, comp_options):
+    Input(component_id='salary_slider4', component_property='value'),])
+def function_4_6( company, inflation, benefits, salary, salaries):
 
     if (company == "" or company==None ):
-        return fun.get_default_graph(bg_color = "#f5f5f5")
-
-    if fun.in_options(comp_options, company) == False:
-        return fun.get_default_graph(bg_color = "#f5f5f5")
+        return fun.get_default_graph(bg_color = "#f5f5f5",height = 200)
 
     df_temp=df[df.employer==company]
 
     if df_temp.shape[0]==0:
-        return fun.get_default_graph(bg_color = "#f5f5f5")
+        return fun.get_default_graph(bg_color = "#f5f5f5",height = 200)
     else:
         earn_column = fun.get_earnings_column(inflation, salary, benefits)
         if earn_column=="":
-            return fun.get_default_graph(bg_color = "#f5f5f5")
+            return fun.get_default_graph(bg_color = "#f5f5f5",height = 200)
 
         if df_temp.shape[0]==0 :
-            return fun.get_default_graph(bg_color = "#f5f5f5")
+            return fun.get_default_graph(bg_color = "#f5f5f5",height = 200)
 
         df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
         if (salaries[1]<600000):
             df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
 
         if df_temp.shape[0]==0:
-                return fun.get_default_graph(bg_color = "#f5f5f5")
+            return fun.get_default_graph(bg_color = "#f5f5f5",height = 200)
 
         df_m= df_temp[df_temp._gender_x.astype(str)=='male']
         df_f= df_temp[df_temp._gender_x.astype(str)=='female']
@@ -521,14 +459,10 @@ def company_pie2_generate( company, inflation, benefits, salary, salaries, comp_
 ###############################################################################
 @app.callback(
     Output(component_id='company_ratings_summary', component_property='children'),
-    [Input(component_id='companies_select4', component_property='value'),
-    Input(component_id='companies_select4', component_property='options')])
-def company_ratings_summary_generate(company, comp_options):
+    [Input(component_id='companies_select4', component_property='value')])
+def function_4_7(company):
 
     if (company == "" or company==None ):
-        return ""
-
-    if fun.in_options(comp_options, company) == False:
         return ""
 
     df_temp=df[df.employer==company]
@@ -572,12 +506,10 @@ def company_ratings_summary_generate(company, comp_options):
 ###############################################################################
 @app.callback(
     Output(component_id='company_ratings_summary_details', component_property='children'),
-    [Input(component_id='companies_select4', component_property='value'),
-    Input(component_id='companies_select4', component_property='options')])
-def company_ratings_summary_generate(company, comp_options):
+    [Input(component_id='companies_select4', component_property='value')])
+def function_4_8(company, ):
+
     if (company == "" or company==None ):
-        return ""
-    if fun.in_options(comp_options, company) == False:
         return ""
 
     df_temp=df[df.employer==company]
@@ -600,13 +532,10 @@ def company_ratings_summary_generate(company, comp_options):
     Output(component_id='ratings_all_summary', component_property='children'),
     [Input(component_id='order_select', component_property='value'),
     Input(component_id='companies_select4', component_property='value'),
-    Input(component_id='sector_select4', component_property='value'),
-    Input(component_id='companies_select4', component_property='options')])
-def ratings_all_summary(order, company, sector, comp_options):
-    if (company == "" or company==None or sector== "" or sector == None):
-        return ""
+    Input(component_id='sector_select4', component_property='value'),])
+def function_4_9(order, company, sector,):
 
-    if fun.in_options(comp_options, company) == False:
+    if (company == "" or company==None or sector== "" or sector == None):
         return ""
 
     df_temp=df[df._sector==sector]
@@ -628,6 +557,7 @@ def ratings_all_summary(order, company, sector, comp_options):
         'Work, Life Balance', 'Salary, benefits', "Job Security, Advancement", 'Mgmt', 'CEO approval']
 
         ranks = df_temp[df_temp.Employer==company].Rank.tolist()
+
         my_rank = 0
         if df_temp.shape[0]>0:
             my_rank = ranks[0] -1
@@ -663,20 +593,29 @@ def ratings_all_summary(order, company, sector, comp_options):
 @app.callback(
     Output(component_id='companies_select4', component_property= 'options'),
     [Input(component_id='sector_select4', component_property='value')])
-def call1_3(value):
+def function_4_10(value):
+    if value== None:
+        return []  
     temp = df[df._sector==value]
     options=[]
     ret1 = temp.employer.unique()
     ret1 = list(ret1)
     ret1.sort()
     for i in ret1:
+        i = i.strip()
         options.append({'label': i, 'value': i})
     return options
 # @app.callback(
 #     Output(component_id='companies_select4', component_property='value'),
 #     [Input(component_id='sector_select4', component_property='value')])
 # def call24(value):
-#     return None  
+#     if value== None:
+#         return None  
+@app.callback(
+    Output(component_id='companies_select4', component_property='value'),
+    [Input(component_id='companies_select4', component_property= 'options')])
+def call24(value):
+    return None  
 
 
 ###############################################################################
@@ -685,12 +624,12 @@ def call1_3(value):
 @app.callback(
     Output(component_id='position_select4', component_property= 'options'),
     [Input(component_id='sector_select4', component_property='value')])
-def call1(value):
+def function_4_11(value):
     return fun.get_roles(value, db_app.df)
 
 @app.callback(
     Output(component_id='position_select4', component_property= 'value'),
     [Input(component_id='sector_select4', component_property='value'),
     Input(component_id='companies_select4', component_property='value')])
-def call11(value, value1):
+def function_4_12(value, value1):
     return None

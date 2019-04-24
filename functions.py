@@ -120,8 +120,10 @@ def get_earnings_column(inflation, salary, benefits):
 ##############################################################################
 # Returns empty graph (black space with nothing on it)
 ##############################################################################
-def get_default_graph(height = 200, title = '', bg_color = 'white'):
-    return {
+def get_default_graph(height = 0, title = '', bg_color = 'white'):
+
+
+    rn = {
             'data': [
             ],
             'layout': {
@@ -132,13 +134,16 @@ def get_default_graph(height = 200, title = '', bg_color = 'white'):
                     'color': db_app.COLORS['text'],
                     'size':'120%'},
                 'margin':{'t':'1em','r':40,'l':(37*7),'b':50},
-                # 'height': height,
                 'showlegend':False,
-
                 'yaxis':dict(showticklabels=False, showgrid=False, zeroline=False, showline=False),
                 'xaxis':dict(showticklabels=False, showgrid=False, zeroline=False, showline=False),
             }
         }
+
+    if height>0:
+        rn['layout']['height']=height
+
+    return rn 
 
 
 ##############################################################################

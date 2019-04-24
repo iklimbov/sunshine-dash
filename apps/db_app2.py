@@ -51,23 +51,23 @@ layout = html.Div(children=[
                       html.H5(children='Sector (leave blank for all):'),
                       dcc.Dropdown(
                                   id='sector_select2',
-                                  clearable=False,
+                                  clearable=True,
                                   options=[{'label': i, 'value': i} for i in db_app.SECTORS],
-                                  value = 'Universities'
+                                  # value = 'Universities'
                   )]),
                   html.Div([
                       html.H5(children='Employer I :'),                      
                       dcc.Dropdown(
                                   id='companies_select2a',
-                                  clearable=False,
-                                  value = 'Trent University'
+                                  clearable=True,
+                                  # value = 'Trent University'
                   )]),
                   html.Div([
                       html.H5(children='Employer II:'),
                       dcc.Dropdown(
                                   id='companies_select2b',
-                                  clearable=False,
-                                  value= 'Ryerson University'
+                                  clearable=True,
+                                  # value= 'Ryerson University'
                   )]),
 
             ],className=['container-fluid']),
@@ -88,7 +88,7 @@ layout = html.Div(children=[
         ],className='col-sm-3'),
 
     ],className='container-fluid well'),  
-    html.H3(children="Salary Distribution"),  
+    html.H3(id = 'dist_title'),  
     html.Div([
         html.Div ([
             dcc.Graph(id='dist_graph1'),
@@ -100,7 +100,7 @@ layout = html.Div(children=[
             dcc.Graph(id='dist_graph3'),
         ],className=['col-sm-4']),
     ],className='col-sm-12 container-fluid'),
-    html.H3(children="Quartile Summary"),  
+    html.H3(id='summary_title'),  
     html.Div([
         html.Div ([
             html.Div(id='dist_summary1',className='summary'),
@@ -252,7 +252,7 @@ def cbg3(sector, company, position, inflation, benefits, salary, salaries):
     Input(component_id='salary_slider2', component_property='value')])
 def cbg3(sector, company, position, inflation, benefits, salary, salaries):
     if (company==None or sector==None or company=='None'):
-        return ""
+        return fun.get_default_graph()
 
     df_temp = db_app.df18.copy()
 
@@ -387,6 +387,62 @@ def sb2_adjust(sector, position, inflation, benefits, salary, salaries):
     return fun.generate_table(df_temp, title = str(sector) , display_columns=True, 
         dtypes = ["","num","num","per","dol","dol","dol"], col_to_highlight_negatives=6)
 
+
+###############################################################################
+# Returns first subtitle or an information box
+###############################################################################
+@app.callback(
+    Output(component_id='dist_title', component_property='children'),
+    [Input(component_id='sector_select2', component_property='value'),
+    Input(component_id='companies_select2a', component_property='value'),
+    Input(component_id='companies_select2b', component_property='value'),])
+def cbg2(sector, company1, company2):
+    
+    if sector == None:
+        return html.Div(children = 'Select Sector and upto two Companies to Compare',className= ['alert alert-info'])
+    txt = sector
+    if company1 is None and (not company2 is None):
+        company1= company2
+        company2 = None
+    try:
+        txt += ": " + company1
+    except:
+        pass
+    finally:
+        try:
+            txt += " vs " + company2
+        except:
+            pass
+    return txt
+
+###############################################################################
+# Returns second subtitle 
+###############################################################################
+@app.callback(
+    Output(component_id='summary_title', component_property='children'),
+    [Input(component_id='sector_select2', component_property='value'),
+    Input(component_id='companies_select2a', component_property='value'),
+    Input(component_id='companies_select2b', component_property='value'),])
+def cbg2(sector, company1, company2):
+    
+    if sector == None:
+        return ""
+    txt = "Quartile Summary for " + sector
+    if company1 is None and (not company2 is None):
+        company1= company2
+        company2 = None
+    try:
+        txt += ". " + company1
+    except:
+        pass
+    finally:
+        try:
+            txt += " vs " + company2
+        except:
+            pass
+    return txt
+
+
 ###############################################################################
 # SUMMARY BOX - for selected company I
 # takes into account earnings columns and position
@@ -399,12 +455,9 @@ def sb2_adjust(sector, position, inflation, benefits, salary, salaries):
     Input(component_id='inflation_ajust2', component_property='values'),
     Input(component_id='include_benefits2', component_property='values'),
     Input(component_id='include_salary2', component_property='values'),
-    Input(component_id='salary_slider2', component_property='value'),
-    Input(component_id='companies_select2b', component_property='options'),])
-def sb3_adjust( sector, company, position, inflation, benefits, salary, salaries, comp_options):
+    Input(component_id='salary_slider2', component_property='value'),])
+def sb3_adjust( sector, company, position, inflation, benefits, salary, salaries):
     if (company==None or sector==None or company=='None'):
-        return ""
-    if fun.in_options(comp_options, company) == False:
         return ""
 
     df_temp = db_app.df18.copy()
@@ -495,15 +548,11 @@ def sb3_adjust( sector, company, position, inflation, benefits, salary, salaries
     Input(component_id='inflation_ajust2', component_property='values'),
     Input(component_id='include_benefits2', component_property='values'),
     Input(component_id='include_salary2', component_property='values'),
-    Input(component_id='salary_slider2', component_property='value'),
-    Input(component_id='companies_select2b', component_property='options'),])
-def sb3_adjust( sector, company, position, inflation, benefits, salary, salaries, comp_options):
+    Input(component_id='salary_slider2', component_property='value'),])
+def sb3_adjust( sector, company, position, inflation, benefits, salary, salaries):
     if (company==None or sector==None):
         return ""
     df_temp = db_app.df18.copy()
-
-    if fun.in_options(comp_options, company) == False:
-        return ""
 
     if position!='' and position!=None:
         if position=='chief':
@@ -598,12 +647,12 @@ def call1(value):
     for i in ret1:
         options.append({'label': i, 'value': i})
     return options
-# @app.callback(
-#     Output(component_id='companies_select2a', component_property='value'),
-#     [Input(component_id='sector_select2', component_property='value')])
-# def call22(value):
-#     if (value==None or value==""):
-#         return None
+@app.callback(
+    Output(component_id='companies_select2a', component_property='value'),
+    [Input(component_id='sector_select2', component_property='value')])
+def call22(value):
+    if (value==None ):
+        return None
 
 ###############################################################################
 # POPULATE COMPANIES II BASED ON SECTOR SELECTED
@@ -621,12 +670,12 @@ def call1(value):
         options.append({'label': i, 'value': i})
     return options
 
-# @app.callback(
-#     Output(component_id='companies_select2b', component_property='value'),
-#     [Input(component_id='sector_select2', component_property='value')])
-# def call22(value):
-#     if (value==None or value==""):
-#         return None
+@app.callback(
+    Output(component_id='companies_select2b', component_property='value'),
+    [Input(component_id='sector_select2', component_property='value')])
+def call22(value):
+    if (value==None ):
+        return None
 
 
 ###############################################################################
