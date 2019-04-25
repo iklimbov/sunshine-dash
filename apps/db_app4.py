@@ -594,17 +594,7 @@ def function_4_9(order, company, sector,):
     Output(component_id='companies_select4', component_property= 'options'),
     [Input(component_id='sector_select4', component_property='value')])
 def function_4_10(value):
-    if value== None:
-        return []  
-    temp = df[df._sector==value]
-    options=[]
-    ret1 = temp.employer.unique()
-    ret1 = list(ret1)
-    ret1.sort()
-    for i in ret1:
-        i = i.strip()
-        options.append({'label': i, 'value': i})
-    return options
+    return fun.get_companies_for_sector(value,db_app.df18)
 # @app.callback(
 #     Output(component_id='companies_select4', component_property='value'),
 #     [Input(component_id='sector_select4', component_property='value')])

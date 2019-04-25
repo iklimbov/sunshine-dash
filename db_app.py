@@ -34,20 +34,9 @@ df18 = pd.read_csv('data/2018prod.csv.bz2', compression='bz2', header=0, sep=','
 # global variables
 YEARS = [i for i in range(2008,2019)]
 
-SECTORS = [
-'City of Toronto, Services',
-'City of Ottawa, Services',
-'Colleges',
-'Crown Agencies',
-'Government of Ontario - Judiciary',
-'Government of Ontario - Ministries',
-'Hospitals and Boards of Public Health',
-'Hydro One and Ontario Power Generation',
-'Legislative Assembly and Offices',
-'Municipalities and Services',
-'Other Public Sector Employers',
-'Primary/Secondary Education',
-'Universities']
+SECTORS = list(df18._sector.unique())
+SECTORS.sort()
+
 
 POSITIONS = ['other', 'analyst', 'associate dean', 'ceo', 'cfo',  'chro', 'chief','cto', 
 'director', 'doctor', 'executive director', 'firefighter', 'manager', 'minister', 'nurse', 

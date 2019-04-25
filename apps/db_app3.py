@@ -607,14 +607,7 @@ def cbg1_3( sector, company, inflation, benefits, salary, salaries):
     Output(component_id='companies_select3', component_property= 'options'),
     [Input(component_id='sector_select3', component_property='value')])
 def call1_3(value):
-    temp = db_app.df[db_app.df._sector==value]
-    options=[]
-    ret1 = temp.employer.unique()
-    ret1 = list(ret1)
-    ret1.sort()
-    for i in ret1:
-        options.append({'label': i, 'value': i})
-    return options
+    return fun.get_companies_for_sector(value,db_app.df18)
 @app.callback(
     Output(component_id='companies_select3', component_property='value'),
     [Input(component_id='sector_select3', component_property='value')])

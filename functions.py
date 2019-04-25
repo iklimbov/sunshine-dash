@@ -1,4 +1,6 @@
 import dash_html_components as html
+import pandas as pd
+import numpy as np
 
 import db_app
 from db_app import app
@@ -145,9 +147,55 @@ def get_default_graph(height = 0, title = '', bg_color = 'white'):
 
     return rn 
 
+##############################################################################
+# Distribution graph 
+##############################################################################
+def create_dist_graph(sector, company, position, inflation, benefits, salary, salaries):
+    if (sector==None):
+        return get_default_graph()
+
+    df_temp = db_app.df18[db_app.df18._sector==sector].copy()
+
+    if (company != None):
+        df_temp = df_temp[df_temp.employer==company]
+
+    if df_temp.shape[0]==0:
+        return get_default_graph()
+
+    if position!='' and position!=None:
+        if position=='chief':
+            df_temp=df_temp[df_temp.job_category2=='chief']
+        else :
+            df_temp=df_temp[df_temp.job_category1==position]
+
+    if df_temp.shape[0]==0:
+        return get_default_graph()
+    else:
+
+        earn_column = get_earnings_column(inflation, salary, benefits)
+        if earn_column=="":
+            return get_default_graph()
+
+        if df_temp.shape[0]==0 :
+            return get_default_graph()
+
+        df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
+        if (salaries[1]<600000):
+            df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
+
+        if df_temp.shape[0]==0:
+            return get_default_graph()
+
+        df_temp = df_temp[['_gender_x','first_name',earn_column]]
+        df_temp.columns=['_gender_x','first_name','salary_x']
+
+        df_m= df_temp[df_temp._gender_x.astype(str)=='male']
+        df_f= df_temp[df_temp._gender_x.astype(str)=='female']
+
+    return  format_dist_graph_data(df_f, df_m, sector)
 
 ##############################################################################
-# Distribution graph
+# Distribution graph data format
 ##############################################################################
 def format_dist_graph_data(df_f,df_m, title ):
 
@@ -158,9 +206,9 @@ def format_dist_graph_data(df_f,df_m, title ):
                 'color': db_app.COLORS['text'],
                 'size': '120%'},
             'visible':'legendonly',
-            'title': title,
-            'margin':{'t':'1em','r':1,'l':50,'b':40},
-            'height': 650,
+            # 'title': title,
+            'margin':{'t':5,'r':1,'l':50,'b':40},
+            'height': 500,
             'legend':{'orientation':"h"},
             'yaxis':dict(title = '',gridcolor='white', gridwidth=0.3, hoverformat = ',2f', tickformat = ',2f'),
             'xaxis':dict(title = '',hoverformat = '$,2f', tickformat = '$,2f'),
@@ -190,6 +238,94 @@ def format_dist_graph_data(df_f,df_m, title ):
         'layout': gr_layout
     }
     return temp
+
+##############################################################################
+# Returns summary table for the distribution graphs (tab 2)
+##############################################################################
+def create_dist_summary( sector, company, position, inflation, benefits, salary, salaries):
+    if (sector==None):
+        return ""
+
+    df_temp = db_app.df18[db_app.df18._sector==sector].copy()
+
+    if (company != None):
+        df_temp = df_temp[df_temp.employer==company]
+
+    if df_temp.shape[0]==0:
+        return ""
+
+    if position!='' and position!=None:
+        if position=='chief':
+            df_temp=df_temp[df_temp.job_category2=='chief']
+        else :
+            df_temp=df_temp[df_temp.job_category1==position]
+
+    if df_temp.shape[0]==0:
+        return ""
+    else:
+        earn_column = get_earnings_column(inflation, salary, benefits)
+        if earn_column=="":
+            return ""
+
+        if df_temp.shape[0]==0 :
+            return ""
+
+        df_temp = df_temp[df_temp[earn_column]>=salaries[0]]
+        if (salaries[1]<600000):
+            df_temp = df_temp[df_temp[earn_column]<=salaries[1]]
+
+        if df_temp.shape[0]==0:
+                return ""            
+
+        df_temp = df_temp[['_gender_x','first_name',earn_column]]
+        df_temp.columns=['_gender_x','first_name','salary_x']
+
+        b_num = 4
+        if df_temp.shape[0]<10:
+            b_num = df_temp.shape[0]//3
+
+        df_temp['quantiles']=1
+        try:
+            df_temp['quantiles']=pd.qcut(df_temp.salary_x.rank(method='first'), b_num)
+        except:
+            pass
+
+        f = df_temp[df_temp._gender_x=='female']
+        m = df_temp[df_temp._gender_x=='male']
+
+        additional = pd.DataFrame([["Totals",f.shape[0],m.shape[0],100,f.salary_x.mean(),m.salary_x.mean(),0]])
+
+        df_temp = pd.DataFrame(df_temp.groupby(['_gender_x','quantiles']).agg({'first_name':len, 'salary_x':[np.mean,np.min,np.max], }))
+        df_temp.reset_index(inplace=True)
+
+        df_temp.columns=['_gender_x','quantiles','first_name','salary_x', 'salary_min', 'salary_max']
+
+        df_temp = pd.merge(df_temp[df_temp._gender_x=='female'],df_temp[df_temp._gender_x=='male'], how='outer',left_on='quantiles', right_on='quantiles' )
+        
+        df_temp['range'] = [i for i in range(1,df_temp.shape[0]+1)]
+        df_temp = df_temp[['range','first_name_x','first_name_y','salary_x_x','salary_x_y']]
+        df_temp.fillna(0, inplace=True)
+        if df_temp.shape[0]==0:
+                return "" 
+
+        df_temp['per_female'] = get_f_count_number(df_temp.first_name_x, df_temp.first_name_y)
+        df_temp['difference'] = df_temp.apply(lambda x: x.salary_x_x - x.salary_x_y, axis = 1)
+
+        df_temp = df_temp[['range','first_name_x','first_name_y','per_female','salary_x_x','salary_x_y', 'difference']]
+       
+
+        additional.columns=df_temp.columns
+        additional['per_female'] = get_f_count_number(additional.first_name_x, additional.first_name_y)
+        additional['difference'] = additional.apply(lambda x: x.salary_x_x - x.salary_x_y, axis = 1)
+
+        df_temp = pd.concat([df_temp,additional], axis=0)
+
+
+        df_temp.columns = ['Quartile','Total (women)','Total (men)', 'Percent (women)','Average salary (woman)','Average salary (man)', 'Difference']
+
+    return generate_table(df_temp, title = "" , display_columns=True, 
+        dtypes = ["","num","num","per","dol","dol","dol"], col_to_highlight_negatives=6)
+
 
 ##############################################################################
 # Horizontal stack graph
@@ -315,6 +451,18 @@ def get_roles(sector,df):
 
     return options
 
+##############################################################################
+# Returns list of companies for the given sector
+##############################################################################
+def get_companies_for_sector(sector, df):
+    temp = df[df._sector==sector]
+    options=[]
+    ret1 = temp.employer.unique()
+    ret1 = list(ret1)
+    ret1.sort()
+    for i in ret1:
+        options.append({'label': i, 'value': i})
+    return options
 
 ##############################################################################
 # Checks to see if the value is in the options of the check box 
