@@ -270,7 +270,7 @@ def displaySectorSummary(inflation, benefits, salary, salaries):
     
     dd.columns = ['Sector','Total (men)','Total (women)', 'Percent (women)','Average salary (men)','Average salary (women)', 'Difference']
 
-    return fun.generate_table(dd, title='Averages by Sector for '+ str(db_app.CURRENT_YEAR),  dtypes = ["","num","num","per","dol","dol","dol",],col_to_highlight_negatives=6)
+    return fun.generate_table(dd, title='Averages by Sector for '+ str(db_app.CURRENT_YEAR),  dtypes = ["","num","num","per","dol","dol","dol",],col_to_highlight_negatives=[6])
 
 
 

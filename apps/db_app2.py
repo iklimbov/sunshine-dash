@@ -385,7 +385,7 @@ def sb2_adjust(sector, position, inflation, benefits, salary, salaries):
         df_temp.columns = ['Quartile','Total (women)','Total (men)', 'Percent (women)','Average salary (woman)','Average salary (man)', 'Difference']
 
     return fun.generate_table(df_temp, title = str(sector) , display_columns=True, 
-        dtypes = ["","num","num","per","dol","dol","dol"], col_to_highlight_negatives=6)
+        dtypes = ["","num","num","per","dol","dol","dol"], col_to_highlight_negatives=[6])
 
 
 ###############################################################################
@@ -534,7 +534,7 @@ def sb3_adjust( sector, company, position, inflation, benefits, salary, salaries
         df_temp.columns = ['Quartile','Total (women)','Total (men)', 'Percent (women)','Average salary (woman)','Average salary (man)', 'Difference']
 
     return fun.generate_table(df_temp, title = str(company) , display_columns=True, 
-        dtypes = ["","num","num","per","dol","dol","dol"], col_to_highlight_negatives=6)
+        dtypes = ["","num","num","per","dol","dol","dol"], col_to_highlight_negatives=[6])
 
 ###############################################################################
 # SUMMARY BOX - for selected company II
@@ -628,7 +628,7 @@ def sb3_adjust( sector, company, position, inflation, benefits, salary, salaries
         df_temp.columns = ['Quartile','Total (women)','Total (men)', 'Percent (women)','Average salary (woman)','Average salary (man)', 'Difference']
 
     return fun.generate_table(df_temp, title = str(company) , display_columns=True, 
-        dtypes = ["","num","num","per","dol","dol","dol"], col_to_highlight_negatives=6)
+        dtypes = ["","num","num","per","dol","dol","dol"], col_to_highlight_negatives=[6])
 
 
 
