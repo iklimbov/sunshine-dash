@@ -34,7 +34,10 @@ df18 = pd.read_csv('data/2018prod.csv.bz2', compression='bz2', header=0, sep=','
 # global variables
 YEARS = [i for i in range(2008,2019)]
 
-SECTORS = ['Colleges',
+SECTORS = [
+'City of Toronto, Services',
+'City of Ottawa, Services',
+'Colleges',
 'Crown Agencies',
 'Government of Ontario - Judiciary',
 'Government of Ontario - Ministries',
