@@ -347,7 +347,7 @@ def populate_sack_1(sector,years, position, inflation, benefits, salary, salarie
                 'layout' : {
                     'title':'Sector totals',   
                     'margin':{'t':30,'r':20,'l':50,'b':50},
-                    'height': 340,
+                    'height': 300,
                     'showlegend':True,
                     'legend':{'orientation':"h"},
                         'xaxis':dict(
@@ -384,7 +384,7 @@ def populate_sack_2(value):
             'layout' : {
                 'title':'Employer Totals',   
                 'margin':{'t':30,'r':20,'l':50,'b':50},
-                'height': 340,
+                'height': 300,
                 'showlegend':True,
                 'legend':{'orientation':"h"},
                     'xaxis':dict(
