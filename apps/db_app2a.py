@@ -512,12 +512,6 @@ def one_line_summary(sector, company, position, inflation, benefits, salary, sal
 
     df_temp = db_app.df18[db_app.df18._sector==sector].copy()
 
-    if (company != None):
-        df_temp = df_temp[df_temp.employer==company]
-
-    if df_temp.shape[0]==0:
-        return err
-
     if position!='' and position!=None:
         if position=='chief':
             df_temp=df_temp[df_temp.job_category2=='chief']
@@ -541,17 +535,27 @@ def one_line_summary(sector, company, position, inflation, benefits, salary, sal
 
         if df_temp.shape[0]==0:
             return err
+
+        # calculate largest employeers in the sector before applying company filter
+        df_temp2 = pd.DataFrame(df_temp.groupby(['employer']).agg({'first_name':np.size, 'salary_x':np.mean}))
+        df_temp2 = df_temp2.reset_index().sort_values('first_name', ascending=False)[:5]
+        df_temp2.columns = [' ', "Total Employees on Sunshine List","Average Salary"]
+
+        if (company != None):
+            df_temp = df_temp[df_temp.employer==company]
+
+        if df_temp.shape[0]==0:
+            return err
+
         df_temp = df_temp[['_gender_x','first_name',earn_column, 'employer']]
         df_temp.columns=['_gender_x','first_name','salary_x', 'employer']
 
         temp = []
-
         temp.append([df_temp.shape[0], df_temp[df_temp._gender_x=='female'].shape[0], df_temp[df_temp._gender_x=='male'].shape[0],
             (df_temp[df_temp._gender_x=='female'].shape[0] / (df_temp[df_temp._gender_x=='female'].shape[0]+df_temp[df_temp._gender_x=='male'].shape[0])*100),
             df_temp.salary_x.mean(),df_temp[df_temp._gender_x=='male'].salary_x.mean(),df_temp[df_temp._gender_x=='female'].salary_x.mean(),
             (df_temp[df_temp._gender_x=='female'].salary_x.mean() - df_temp[df_temp._gender_x=='male'].salary_x.mean())
             ])
-
         df_temp1 = pd.DataFrame(temp)
         df_temp1.columns = ['Total Employees','Total (women)','Total (men)', 'Percent (women)','Average salary','Average salary (woman)',
         'Average salary (man)', 'Difference']
@@ -559,13 +563,7 @@ def one_line_summary(sector, company, position, inflation, benefits, salary, sal
         div1 = html.Div(children = fun.generate_table(df_temp1, title = "Totals" , display_columns=True,
             dtypes = ["num","num","num","per", "dol","dol", "dol", "dol"], col_to_highlight_negatives=[7], col_to_highlight_negatives_per=[3]))
 
-        # add largest employeers in the sector
-        df_temp2 = pd.DataFrame(df_temp.groupby(['employer']).agg({'first_name':np.size, 'salary_x':np.mean}))
-        df_temp2 = df_temp2.reset_index().sort_values('first_name', ascending=False)[:5]
-        df_temp2.columns = [' ', "Total Employees on Sunshine List","Average Salary"]
 
-        # div2 = html.Div(children = fun.generate_table(df_temp2,title='Largest Employers in this Sector', 
-        #     display_columns=True,dtypes=["","num"])),
         div2 = html.Div(children = fun.generate_table(df_temp2, title = "Largest Employers in this Sector" , display_columns=True,
         dtypes = ["","num","dol"]))
         return [div1, div2]
