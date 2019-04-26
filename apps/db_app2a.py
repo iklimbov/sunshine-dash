@@ -25,7 +25,7 @@ layout = html.Div(children=[
                     min=0,
                     max=db_app.EARNINGS[-1],
                     step=10000,
-                    value=[db_app.EARNINGS[0], db_app.EARNINGS[-2]],
+                    value=[db_app.EARNINGS[0], db_app.EARNINGS[-1]],
                 )],className=['container-fluid'],style={'margin-bottom':'4em', 'margin-top':0}),
                 html.Div([
                     html.H5(
@@ -58,7 +58,7 @@ layout = html.Div(children=[
         ],className='col-sm-4'),
         html.Div([
             html.Div([
-                  html.Div([
+                  # html.Div([
                       html.H5(children='Sector I:'),
                       dcc.Dropdown(
                                   id='sector_select2a',
@@ -75,10 +75,10 @@ layout = html.Div(children=[
                   )]),
                   
 
-            ],className=['container-fluid']),
+            # ],className=['container-fluid']),
         ],className='col-sm-4'),
         html.Div([
-          html.Div([
+          # html.Div([
                 html.Div([
                       html.H5(children='Sector II:'),
                       dcc.Dropdown(
@@ -94,13 +94,13 @@ layout = html.Div(children=[
                               clearable=True,
                               # value= 'Ryerson University'
                 )]),
-             ],className='container-fluid'),
+             # ],className='container-fluid'),
         ],className='col-sm-4'),
 
     ],className='container-fluid well'),  
 
     html.Div([       
-            html.Div([
+            # html.Div([
                 html.H2(id = 'selecttion_1a_title'),
                 html.Div ([
                     html.Div(id='selecttion_1_summary',className='summary'),
@@ -112,11 +112,11 @@ layout = html.Div(children=[
                 html.Div ([
                     html.Div(id='dist_summary1a',className='summary'),
                 ],className='container-fluid'),
-            ],className="col-sm-12 container-fluid"),
+            # ],className="col-sm-12 container-fluid"),
         ],className=['col-sm-6']),
 
     html.Div([
-            html.Div([
+            # html.Div([
                 html.H2(id = 'selecttion_2a_title'),
                 html.Div ([
                     html.Div(id='selecttion_2_summary',className='summary'),
@@ -128,7 +128,7 @@ layout = html.Div(children=[
                 html.Div ([
                     html.Div(id='dist_summary2a',className='summary'),
                 ],className='container-fluid'),
-            ],className="col-sm-12 container-fluid"),
+            # ],className="container-fluid"),
 
         ],className=['col-sm-6']),
      
@@ -503,7 +503,7 @@ def create_dist_graph(sector, company, position, inflation, benefits, salary, sa
     return  fun.format_dist_graph_data(df_f, df_m, sector)
 
 ##############################################################################
-# One line summary for the selection 
+# One line summary for the selection + top 10 employers
 ##############################################################################
 def one_line_summary(sector, company, position, inflation, benefits, salary, salaries):
     err = html.Div(children = 'Select Sector and Company',className= ['alert alert-info'])
@@ -541,9 +541,8 @@ def one_line_summary(sector, company, position, inflation, benefits, salary, sal
 
         if df_temp.shape[0]==0:
             return err
-
-        df_temp = df_temp[['_gender_x','first_name',earn_column]]
-        df_temp.columns=['_gender_x','first_name','salary_x']
+        df_temp = df_temp[['_gender_x','first_name',earn_column, 'employer']]
+        df_temp.columns=['_gender_x','first_name','salary_x', 'employer']
 
         temp = []
 
@@ -553,11 +552,20 @@ def one_line_summary(sector, company, position, inflation, benefits, salary, sal
             (df_temp[df_temp._gender_x=='female'].salary_x.mean() - df_temp[df_temp._gender_x=='male'].salary_x.mean())
             ])
 
-        df_temp = pd.DataFrame(temp)
-        df_temp.columns = ['Total Employees','Total (women)','Total (men)', 'Percent (women)','Average salary','Average salary (woman)',
+        df_temp1 = pd.DataFrame(temp)
+        df_temp1.columns = ['Total Employees','Total (women)','Total (men)', 'Percent (women)','Average salary','Average salary (woman)',
         'Average salary (man)', 'Difference']
 
-        return fun.generate_table(df_temp, title = "" , display_columns=True,
-        dtypes = ["num","num","num","per", "dol","dol", "dol", "dol"], col_to_highlight_negatives=[7], col_to_highlight_negatives_per=[3])
+        div1 = html.Div(children = fun.generate_table(df_temp1, title = "Totals" , display_columns=True,
+            dtypes = ["num","num","num","per", "dol","dol", "dol", "dol"], col_to_highlight_negatives=[7], col_to_highlight_negatives_per=[3]))
 
-       
+        # add largest employeers in the sector
+        df_temp2 = pd.DataFrame(df_temp.groupby(['employer']).agg({'first_name':np.size, 'salary_x':np.mean}))
+        df_temp2 = df_temp2.reset_index().sort_values('first_name', ascending=False)[:5]
+        df_temp2.columns = [' ', "Total Employees on Sunshine List","Average Salary"]
+
+        # div2 = html.Div(children = fun.generate_table(df_temp2,title='Largest Employers in this Sector', 
+        #     display_columns=True,dtypes=["","num"])),
+        div2 = html.Div(children = fun.generate_table(df_temp2, title = "Largest Employers in this Sector" , display_columns=True,
+        dtypes = ["","num","dol"]))
+        return [div1, div2]

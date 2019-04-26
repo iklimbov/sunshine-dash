@@ -52,7 +52,7 @@ h1{
 	background-color: #333333;
 	color: white;
 	padding: 1em;
-	margin: 0 0 1em 0;
+	/*margin: 0 0 1em 0;*/
 }
 
 .ratings_summary {
