@@ -124,8 +124,21 @@ layout = html.Div(children=[
         ],className='container-fluid'),
     ],id='summaries',className=['col-sm-8 container-fluid']),
 
+    html.Div(id='placeholder4',style={'display': 'None'}),
+
+    html.Div(id='footer4')
 ])
 
+
+
+###############################################################################
+# Page footer
+###############################################################################
+@app.callback(
+    Output(component_id='footer4', component_property= 'children'),
+    [Input('placeholder4', 'value')])
+def call1(value):
+    return fun.get_footer()
 
 
 ###############################################################################

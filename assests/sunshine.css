@@ -32,6 +32,7 @@ h2{
 h1{
 	font-size: 300%;
 	text-align: center;
+	padding-bottom: 1em;
 }
 .app-header {
     height: 60px;
@@ -84,10 +85,27 @@ td, th {
 
 .tab--selected {
 	font-size: 160%;
-	border-right: 10px solid #d6d6d6;
+	border-right: 10px solid #000080;
+	border-top: 10px solid #000080;
 	/*background-color: yellow;*/
 }
 
+.tab--selected.jsx-2137964197 {
+    border-top: 2px solid #000080;
+}
+
+.rc-slider-track {
+	height: 2px;
+	background-color: #000080;
+}
+
+.rc-slider-handle {
+    border: solid 2px #000080;
+}
+
+.rc-slider-dot-active {
+    border-color: #000080;
+}
 
 /*highlight one row in the table*/
 .highlight_row {
@@ -130,7 +148,75 @@ input[type=checkbox], input[type=radio] {
     width: 20px; 
     height: 20px;
     font-size: 120%;
-/*    cursor: pointer;
-	-webkit-appearance: none;
-	appearance: none;*/
+}
+
+.img_center.col-sm-1{
+	padding-top: 6em;
+	width: 7em;
+}
+
+.compare_box{
+	border: 3px solid lightgrey;
+	padding-top: 1em;
+	padding-bottom: 3em;
+}
+
+.alert-info-black{
+	background-color: #333333;
+}
+
+/*TABS*/
+
+.custom-tabs-container {
+    width: 85%;
+}
+.custom-tabs {
+    border-top-left-radius: 3px;
+    background-color: #f9f9f9;
+    padding: 0px 24px;
+    border-bottom: 1px solid #d6d6d6;
+}
+
+.custom-tab {
+    color: grey;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-top: 1px solid lightgrey !important;
+    border-left: 1px solid lightgrey !important;
+    border-right: 1px solid lightgrey !important;
+    border-bottom: 2px solid #000080 !important;
+    background-color: #fafbfc;
+    padding: 1em !important;
+    font-family: "system-ui";
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+.custom-tab--selected {
+    color: #e36209;
+    font-size: 200%;
+    /*font-weight: bold;*/
+    box-shadow: 1px 1px 0px white;
+    border-left: 1px solid #000080 !important;
+    border-right: 1px solid #000080 !important;
+    /*border-top: 3px solid #000080 !important;*/
+    border-bottom: 1px solid transparent !important;
+    border-top: 3px solid #e36209 !important;
+}
+
+.footer{
+	color: #000080;
+	padding: 1em;
+	clear: both;
+	font-size: 130%;
+    background-color: #f5f5f5;
+    border: 1px solid grey;
+    text-align: right;
+}
+
+.footer a {
+	color: #000080;
+	padding: 1em;
+	clear: both;
+    background-color: #f5f5f5;
 }

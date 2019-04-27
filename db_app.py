@@ -6,22 +6,24 @@ import flask
 
 # init the app
 app = dash.Dash(__name__)
+server = app.server
+
 app.config.suppress_callback_exceptions = True
 app.css.append_css({
     'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
 })
 
 # add custom css
-css_directory = os.getcwd()
+base_dir = os.getcwd()
 stylesheets = ['sunshine.css']
-static_css_route = '/static/assests/'
+static_route = '/static/assests/'
 
-@app.server.route('{}<stylesheet>'.format(static_css_route))
-def serve_stylesheet(stylesheet):
-    return flask.send_from_directory(css_directory+"/assests/", stylesheet)
+@app.server.route('{}<stylesheet>'.format(static_route))
+def serve_assets(stylesheet):
+    return flask.send_from_directory(base_dir+"/assests/", stylesheet)
 
 for stylesheet in stylesheets:
-    app.css.append_css({"external_url": static_css_route+"{}".format(stylesheet)})
+    app.css.append_css({"external_url": static_route+"{}".format(stylesheet)})
 
 # external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 # external_stylesheets = ['https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css']

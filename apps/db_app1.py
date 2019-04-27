@@ -5,16 +5,19 @@ from dash.dependencies import Input, Output
 import numpy as np
 import pandas as pd
 import json
+import flask
 
 from db_app import app
 import db_app
 import functions as fun
 
 
+
 ###############################################################################
 # HTML layout
 ###############################################################################
 layout = html.Div(children=[
+    
     html.Div([
         html.Div([
             html.Div([
@@ -111,7 +114,14 @@ layout = html.Div(children=[
     ],className='col-sm-6 container-fluid'),
 
     html.Div(id='intermediate-value',style={'display': 'None'}),
+
+    # html.A(html.Button("report"), href="/about", target="popup"),
+    html.Div(id='placeholder1',style={'display': 'None'}),
+
+    html.Div(id='footer1')
 ])
+
+
 
 
 ###############################################################################
@@ -132,6 +142,15 @@ def call1(value):
     [Input(component_id='sector_select', component_property='value')])
 def call2(value):
     return None
+
+###############################################################################
+# Page footer
+###############################################################################
+@app.callback(
+    Output(component_id='footer1', component_property= 'children'),
+    [Input('placeholder1', 'value')])
+def call1(value):
+    return fun.get_footer()
 
 
 ###############################################################################

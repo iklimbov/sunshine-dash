@@ -113,9 +113,23 @@ layout = html.Div(children=[
     ],className=['col-sm-12 panel']),
     html.Div([
         html.Div(id='dedug-out',style={'display': 'None'}),
-    ],className=['col-sm-12 panel panel-default'])
+    ],className=['col-sm-12 panel panel-default']),
 
+    html.Div(id='placeholder3',style={'display': 'None'}),
+
+    html.Div(id='footer3')
 ])
+
+
+
+###############################################################################
+# Page footer
+###############################################################################
+@app.callback(
+    Output(component_id='footer3', component_property= 'children'),
+    [Input('placeholder3', 'value')])
+def call1(value):
+    return fun.get_footer()
 
 
 ###############################################################################

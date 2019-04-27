@@ -5,6 +5,7 @@ from dash.dependencies import Input, Output
 import numpy as np
 import pandas as pd
 import json
+import base64
 
 from db_app import app
 import db_app
@@ -55,11 +56,12 @@ layout = html.Div(children=[
                             
                 )],className=['col-sm-4'] ),
 
-        ],className='col-sm-4'),
+        ],className='col-sm-5'),
         html.Div([
+            html.H3(children='Selection I'),
             html.Div([
                   # html.Div([
-                      html.H5(children='Sector I:'),
+                      html.H5(children='Sector:'),
                       dcc.Dropdown(
                                   id='sector_select2a',
                                   clearable=True,
@@ -67,35 +69,36 @@ layout = html.Div(children=[
                                   # value = 'Universities'
                   )]),
                   html.Div([
-                      html.H5(children='Employer I:'),                      
+                      html.H5(children='Employer (leave blank for all):'),                      
                       dcc.Dropdown(
                                   id='companies_select_1',
                                   clearable=True,
                                   # value = 'Trent University'
                   )]),
-                  
 
             # ],className=['container-fluid']),
-        ],className='col-sm-4'),
+        ],className='compare_box col-sm-3'),
+        html.Img(src=db_app.static_route+"{}".format('arr1.png'),className='img_center col-sm-1'),
         html.Div([
+                html.H3(children='Selection II'),
           # html.Div([
                 html.Div([
-                      html.H5(children='Sector II:'),
+                      html.H5(children='Sector:'),
                       dcc.Dropdown(
                                   id='sector_select2b',
                                   clearable=True,
                                   options=[{'label': i, 'value': i} for i in db_app.SECTORS],
                                   # value = 'Universities'
-                )]),
+                )]),                
                 html.Div([
-                  html.H5(children='Employer II:'),
+                  html.H5(children='Employer (leave blank for all):'),
                   dcc.Dropdown(
                               id='companies_select_2',
                               clearable=True,
                               # value= 'Ryerson University'
                 )]),
              # ],className='container-fluid'),
-        ],className='col-sm-4'),
+        ],className='compare_box col-sm-3'),
 
     ],className='container-fluid well'),  
 
@@ -133,16 +136,25 @@ layout = html.Div(children=[
         ],className=['col-sm-6']),
      
 
-    # html.Div([
-    #     html.Div(id='dedug-out',style={'display': 'None'}),
-    # ],className=['col-sm-12 panel panel-default'])
+    html.Div(id='placeholder2',style={'display': 'None'}),
 
+    html.Div(id='footer2')
 ])
+
 
 
 ###############################################################################
 # CALLBACKS: GRAPHS
 ###############################################################################
+
+###############################################################################
+# Page footer
+###############################################################################
+@app.callback(
+    Output(component_id='footer2', component_property= 'children'),
+    [Input('placeholder2', 'value')])
+def call1(value):
+    return fun.get_footer()
 
 ###############################################################################
 # Distribution graph - for the selected sector and company I
@@ -506,7 +518,7 @@ def create_dist_graph(sector, company, position, inflation, benefits, salary, sa
 # One line summary for the selection + top 10 employers
 ##############################################################################
 def one_line_summary(sector, company, position, inflation, benefits, salary, salaries):
-    err = html.Div(children = 'Select Sector and Company',className= ['alert alert-info'])
+    err = html.Div(children = 'Select Sector and Company',className= ['alert-info-black'])
     if (sector==None):
         return err
 

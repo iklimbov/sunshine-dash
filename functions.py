@@ -140,8 +140,6 @@ def get_earnings_column(inflation, salary, benefits):
 # Returns empty graph (black space with nothing on it)
 ##############################################################################
 def get_default_graph(height = 0, title = '', bg_color = 'white'):
-
-
     rn = {
             'data': [
             ],
@@ -361,5 +359,19 @@ def in_options(options,value):
         k = i['label']
         if k == value:
             return True
-
     return False
+
+
+##############################################################################
+# Returns page footer
+##############################################################################
+def get_footer():
+    x = html.Div([
+        html.Div("",className='col-sm-7'),
+        html.Div([ html.Div([html.A("About Project", href="/about", target="top")],className='col-sm-5'),
+                    html.Div([html.A("Contact", href="mailto:iklimbov@gmail.com?Subject=Sunshine%20list%20Dashboard")],className='col-sm-3'),
+                    html.Div([html.A(["© Inna Klimbovskaia ", html.Img(src=db_app.static_route+"{}".format('linkedin.png'))], 
+                        href="https://www.linkedin.com/in/inna-klimbovskaia-17208b11/", target="popup")],className='col-sm-4'),   
+                ], className='col-sm-5'),
+        ], className='container-fluid footer')
+    return x
