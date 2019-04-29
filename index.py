@@ -32,7 +32,7 @@ app.logger.error(db_app.base_dir)
 
 @app.server.route("/about")
 def get_info_page():
-    return flask.send_from_directory(db_app.base_dir+"/assests/", "footer.html")
+    return flask.send_from_directory(db_app.base_dir+"/assests/", "about.html")
 
 # we only have one page at the moment, with multile tabs
 @app.callback(Output('page-content', 'children'),

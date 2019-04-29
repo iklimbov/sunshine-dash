@@ -5,7 +5,7 @@ import dash_core_components as dcc
 
 from db_app import app
 import db_app
-from apps import db_app1, db_app2, db_app2a, db_app3, db_app4
+from apps import db_app1, db_app2, db_app3, db_app4, db_app5
 
 layout = html.Div([
     html.H1('Sunshine List Ontario'),
@@ -15,6 +15,8 @@ layout = html.Div([
         dcc.Tab(label='2018 Employer Comparison', value='tab-3', className='custom-tab',
                 selected_className='custom-tab--selected'),
         dcc.Tab(label='2018 Employer Ranking', value='tab-4', className='custom-tab',
+                selected_className='custom-tab--selected'),
+        dcc.Tab(label='About Project', value='tab-5', className='custom-tab',
                 selected_className='custom-tab--selected'),
     ]),
     html.Div([
@@ -33,7 +35,9 @@ def render_content(tab):
     if tab == 'tab-1':
         return db_app1.layout
     elif tab == 'tab-3':
-        return db_app2a.layout
+        return db_app2.layout
     elif tab == 'tab-4':
         return db_app4.layout
+    elif tab == 'tab-5':
+        return db_app5.layout
 
